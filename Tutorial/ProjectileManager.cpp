@@ -78,10 +78,7 @@ void ProjectileManager::createProjectile(const Ogre::Vector3& tankPosition, cons
 
 	Ogre::SceneNode* particleSn = parentParticleSn->createChildSceneNode();
 
-	Ogre::Vector3 start = tankPosition;
-	
-	start.y += 10.f;
-	start.x += 1600.f;
+	Ogre::Vector3 start(-100.f, 10.f, 0.f);
 
 	parentParticleSn->setPosition(tankPosition);
 	particleSn->setPosition(start);

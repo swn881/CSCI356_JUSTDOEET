@@ -386,8 +386,8 @@ bool GroupAssignment::keyPressed( const OIS::KeyEvent &arg )
 		case OIS::KC_2:
 			createTanks(2);
 		break;
-		case OIS::KC_GRAVE:
-			if(selectedTank != NULL)
+		case OIS::KC_0:
+			if(inTankMode)
 			{
 				selectedTank->detachCamera(mCamera);
 				mCamera->setPosition(Ogre::Vector3(0, 900, 1000));
@@ -396,7 +396,7 @@ bool GroupAssignment::keyPressed( const OIS::KeyEvent &arg )
 				inTankMode = false;
 				mTrayMgr->showCursor();
 				selectedTank->setPossessed(false);
-
+				//selectedTank = NULL;
 			}
 		break;
 		case OIS::KC_9: //show bounding box
@@ -838,7 +838,7 @@ void GroupAssignment::updateReloadOverlay(double time)
 void GroupAssignment::createPowerUpSpawn(Ogre::Vector3 position)
 {
 	std::ostringstream oss;
-	oss << mPowerupCount++;
+	oss << ++mPowerupCount;
 	std::string name = "PowerUpSpawn" + oss.str();
 	std::string namePodium = "Podium" + oss.str();
 	std::cout << namePodium << std::endl;

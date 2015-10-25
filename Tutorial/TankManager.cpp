@@ -50,7 +50,7 @@ Tank::Tank(Ogre::BillboardSet* healthBar, Ogre::BillboardSet* selectionCircle,
 	mTankBodyNode->attachObject(mHealthBar);
 	mTankBodyNode->attachObject(mSelectionCircle);
 
-	thirdPersonCamNode = mTankBodyNode->createChildSceneNode(Ogre::Vector3(180.f, 80.f, 0.f));
+	thirdPersonCamNode = mTankBodyNode->createChildSceneNode(Ogre::Vector3(300.f, 150.f, 0.f));
 	thirdPersonCamNode->lookAt(mTankBodyNode->getPosition(), Ogre::Node::TransformSpace::TS_LOCAL);
 
 	
@@ -124,7 +124,7 @@ void Tank::setPath(std::deque<int>& path){
 }
 
 void Tank::shoot(void){
-	tnkMgr->createProjectile(mTankBodyNode->_getDerivedPosition(), mTankTurretNode->_getDerivedOrientation(), Ogre::Degree(barrelDegree), shootingVelocity, dmg);
+	tnkMgr->createProjectile(mTankBodyNode->getPosition(), mTankTurretNode->_getDerivedOrientation(), Ogre::Degree(barrelDegree), shootingVelocity, dmg);
 }
 
 void Tank::takeDamage(const int& dmg){
@@ -198,29 +198,91 @@ void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpa
 	}
 
 	sphereSceneTime += deltaTime;
-	//if(sphereSceneTime > 0.05)
+	if(sphereSceneTime > 0.2)
 	{
+		sphereSceneTime = 0;
+
 		Ogre::Vector3 tankCenter = mTankBodyNode->getPosition();
+		int location;
+		bool found = false;
+
+		for(int i = 0; i < mPowerUpSpawns.size(); i++)
+		{
+			Ogre::Vector3 powerUpLocation = mPowerUpSpawns[i]->spawnNode->getPosition();
+			if(tankCenter.distance(powerUpLocation) < 50)
+			{
+				std::cout << 111 << std::endl;
+				found = true;
+				location = i;
+			}
+		}
+		if (found)
+		{
+			if(mPowerUpSpawns[location]->getIsPowerUp())
+			{
+				char tempType = mPowerUpSpawns[location]->pickupPowerUp(mSceneMgr);
+
+				switch(tempType)
+				{
+					case 'H': //health
+					{
+						hp += 0.1f;
+						if (hp > 1.0f)
+						{
+							hp = 1.0f;
+						}
+					}
+					break;
+					case 'R': //fire rate
+					{
+						fireRate = 1.f;
+						powerUpDuration = 4.f;
+					}
+					break;
+					case 'S': //speed
+					{
+						ms = 90.f;
+						powerUpDuration = 4.f;
+					}
+					break;
+					case 'P': //damage
+					{
+						dmg = 30.f;
+						powerUpDuration = 4.f;
+					}
+					break;
+				}
+			}
+		}
+	}
+
+
+
+
+
+
+/*
 		tankSphere.setCenter(tankCenter);
 		ssq->setSphere(tankSphere);
 		Ogre::SceneQueryResult& result = ssq->execute();
 
-		//projectile hit something
-		if (result.movables.size() > 0 ) //if projectile hit some tank or is just above ground
+		
+
+		if (result.movables.size() > 0 )
 		{
 			Ogre::SceneQueryResultMovableList::iterator sqrItr;
-			for (sqrItr = result.movables.begin(); sqrItr != result.movables.end(); ++sqrItr){
+			for (sqrItr = result.movables.begin(); sqrItr != result.movables.end(); sqrItr++){
 				//if tank, minus health based on the distance from the explosion center
 				
 				bool check = false;
 				int found;
+				Ogre::SceneNode * x = (*sqrItr)->getParentSceneNode();
 				for(int i = 0; i < mPowerUpSpawns.size() && check == false; i++)
 				{
-					std::string temp = "Podium" + std::to_string(i);
-					if((*sqrItr)->getName() == temp )
+					Ogre::SceneNode * y = mPowerUpSpawns[i]->spawnNode;
+					if(x == y )
 					{
 						found = i;
-						std::cout << (*sqrItr)->getName() << std::endl;
 						check = true;
 					}
 				}
@@ -268,7 +330,7 @@ void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpa
 		} 
 		sphereSceneTime = 0;
 	}
-
+	*/
 	if (powerUpDuration > 0.f)
 	{
 		powerUpDuration -= deltaTime;

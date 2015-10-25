@@ -6,7 +6,7 @@
 class PowerUpSpawn
 {
 private:
-	Ogre::SceneNode * spawnNode;
+
 	Ogre::SceneNode * powerNode;
 	Ogre::Entity * powerUp;
 	float timer;
@@ -18,6 +18,8 @@ private:
 	void rotate(float deltaTime);
 
 public:
+	Ogre::SceneNode * spawnNode;
+
 	PowerUpSpawn(Ogre::SceneNode * spawn, std::string name);
 	~PowerUpSpawn();
 	void update(Ogre::SceneManager* ScnMgr, float deltaTime);
