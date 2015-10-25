@@ -11,8 +11,9 @@ GroupAssignment::~GroupAssignment(void)
 {
 	if(pathFindingGraph)
 		delete pathFindingGraph;
-	deletePowerUpSpawns();
 
+	deletePowerUpSpawns();
+	
 	if(tankManager)
 		delete tankManager;
 
@@ -25,8 +26,10 @@ GroupAssignment::~GroupAssignment(void)
 
 bool GroupAssignment::setup(void)
 {
-	BaseApplication::setup();
-
+	if (!BaseApplication::setup())
+	{
+		return false;
+	}
 
 	//////////Danni Code
 	createWeather();

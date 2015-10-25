@@ -333,9 +333,10 @@ void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpa
 		break;
 	}
 
-	
-	// WEE ADDED TILL HERE
-	tankSound->setPosition(convert(getPosition()));
+	Ogre::Vector3 setpos = mTankBodyNode->getPosition();
+	setpos.y = 13.f;
+	mTankBodyNode->setPosition(setpos);
+
 }
 //WEE ADDED CODE HERE
 void Tank::aStarMovement(const float & deltaTime)

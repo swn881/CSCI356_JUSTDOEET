@@ -6,9 +6,10 @@ using namespace irrklang;
 SoundPlayer::SoundPlayer(void)
 {
 	engine = createIrrKlangDevice();
-	fireSound = engine->addSoundSourceFromFile("media/sounds/fire.flac", ESM_AUTO_DETECT, true);
+
+	fireSound = engine->addSoundSourceFromFile("media/sounds/fire.wav", ESM_AUTO_DETECT, true);
 	explosionSound = engine->addSoundSourceFromFile("media/sounds/explosion.wav", ESM_AUTO_DETECT, true);
-	movingTankSound = engine->addSoundSourceFromFile("media/sounds/moving_truck.mp3", ESM_AUTO_DETECT, true);
+	movingTankSound = engine->addSoundSourceFromFile("media/sounds/moving_truck.wav", ESM_AUTO_DETECT, true);
 }
 
 SoundPlayer::~SoundPlayer(void)
@@ -38,7 +39,7 @@ void SoundPlayer::playExplosionSound(const Ogre::Vector3& position){
 }
 
 ISound* SoundPlayer::playMovingTankSound(const Ogre::Vector3& position){
-	ISound* sound = engine->play3D(movingTankSound, convert(position), false, true, true);
+	ISound* sound = engine->play3D(movingTankSound, convert(position), true, false, true, false);
 	iSoundSet.insert(sound);
 	return sound;
 }
