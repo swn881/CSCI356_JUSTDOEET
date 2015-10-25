@@ -158,6 +158,15 @@ bool Tank::isAlive(void){
 	return hp > 0.f;
 }
 
+Ogre::Degree Tank::getShootingAngle(const Ogre::Vector3& targetTank){
+	float distance = getPosition().distance(targetTank);
+
+	//(gravity * distance) / (velocity ^ 2)
+	float inner = (80.f * distance) / (Ogre::Math::Sqr(shootingVelocity));
+
+	return Ogre::Degree(0.5f * Ogre::Math::ASin(inner));
+}
+
 void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpawns){
 	
 	//this check must be first
