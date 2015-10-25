@@ -211,6 +211,19 @@ void BaseApplication::createResourceListener(void)
 void BaseApplication::loadResources(void)
 {
 	Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
+	
+	Ogre::FontManager* fontMgr = Ogre::FontManager::getSingletonPtr();
+	// create a font resource
+	Ogre::ResourcePtr font = fontMgr->create("BlueHighway","General");
+	// set as truetype
+	font->setParameter("type","truetype");
+	// set the .ttf file name
+	font->setParameter("source","bluehigh.fontdef");
+	// set the size
+	font->setParameter("size","40");
+	// set the dpi
+	font->setParameter("resolution","96");
+
 }
 //-------------------------------------------------------------------------------------
 void BaseApplication::go(void)

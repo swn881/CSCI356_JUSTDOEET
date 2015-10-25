@@ -187,26 +187,6 @@ material myMaterial/Bullet5
 	}
 }
 
-material myMaterial/BulletBorder
-{
-	receive_shadows off
-
-	technique
-	{
-		pass
-		{
-			lighting off
-			scene_blend alpha_blend 
-
-			texture_unit
-			{
-				texture bulletBorder.png
-			}
-		}
-	}
-}
-
-
 material myMaterial/Snowflake
 {
 	technique

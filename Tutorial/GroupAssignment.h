@@ -72,6 +72,23 @@ private:
 	void deletePowerUpSpawns();
 	float powerUpTimer;
 	std::set<int> spawnLocations;
+	
+	//NEW DANNI CODE
+	Ogre::Overlay* mTextGUI;
+
+	void createTextElement(Ogre::OverlayManager &overlayManager, Ogre::String title, Ogre::String caption, Ogre::Real x, Ogre::Real y);
+	void createTextOverlay(Ogre::OverlayManager &overlayManager, Ogre::Real x, Ogre::Real y, Ogre::Real width, Ogre::Real height);
+	void updateTextOverlay();
+
+	int testhealth;
+	Ogre::Overlay* mHealthBar;
+	void createHealthOverlay(Ogre::OverlayManager &overlayManager, Ogre::Real x, Ogre::Real y, Ogre::Real width, Ogre::Real height);
+	void updateHealthOverlay(int health);
+	void createHealthBlock(Ogre::OverlayManager &overlayManager, Ogre::String title, Ogre::Real x, Ogre::Real y, Ogre::Real width, Ogre::Real height);
+
+	
+	
+	
 };
  
 #endif // #ifndef __GROUP_ASSIGNMENT_h_

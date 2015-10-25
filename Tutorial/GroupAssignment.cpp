@@ -3,7 +3,8 @@
 //-------------------------------------------------------------------------------------
 GroupAssignment::GroupAssignment(void)
 	: mOverlaySystem(0),
-	mPowerupCount(0)
+	mPowerupCount(0),
+	testhealth(100)
 {
 }
 //-------------------------------------------------------------------------------------
@@ -13,6 +14,8 @@ GroupAssignment::~GroupAssignment(void)
 		delete pathFindingGraph;
 
 	deletePowerUpSpawns();
+	if (mOverlaySystem) 
+		delete mOverlaySystem;
 	
 	if(tankManager)
 		delete tankManager;
@@ -221,6 +224,9 @@ void GroupAssignment::createScene(void)
 
 	Ogre::OverlayManager &overlayManager = Ogre::OverlayManager::getSingleton();
 	createReloadOverlay(overlayManager);
+	createTextOverlay(overlayManager, 0.75, 0.01, 0.24, 0.35);
+	createHealthOverlay(overlayManager, 0.74, 0.38, 0.24, 0.04);
+	
 
 	/*
 	createPowerUpSpawn(pathFindingGraph->getPosition(52)); 
@@ -285,7 +291,14 @@ bool GroupAssignment::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	///////////////////////////////////////////////////////////////////////////////////////////////
 
 	//also needs a check for if we change which tank is selected
-	updateReloadOverlay(mWeaponTimer);
+	
+	
+	if (mTextGUI->isVisible())
+	{
+		updateTextOverlay();
+		updateReloadOverlay(mWeaponTimer);
+		updateHealthOverlay(testhealth); //pass the health
+	}	
 	updatePowerUps(evt.timeSinceLastFrame);
 
 	powerUpTimer += evt.timeSinceLastFrame;
@@ -330,8 +343,24 @@ bool GroupAssignment::keyPressed( const OIS::KeyEvent &arg )
 		//////////////////////////////DANNI CODE
 		case OIS::KC_V:
 			controlWeather();
-		break;
+		break;		
+		case OIS::KC_L:
+		{
+			if (mTextGUI->isVisible())
+			{
+				mTextGUI->hide();
+				mBulletAnimation->hide();
+				mHealthBar->hide();
+			}
+			else
+			{
+				mTextGUI->show();
+				mBulletAnimation->show();
+				mHealthBar->show();
 
+			}
+		}
+		break;	
 		case OIS::KC_P:
 			mWeaponTimer = 0;
 		break;
@@ -836,6 +865,131 @@ void GroupAssignment::deletePowerUpSpawns()
 	}
 
 }
+
+void Assignment1::createTextElement(Ogre::OverlayManager &overlayManager, Ogre::String title, Ogre::String caption, Ogre::Real x, Ogre::Real y)
+{
+	Ogre::OverlayContainer * panel2 = static_cast<Ogre::OverlayContainer*>(overlayManager.createOverlayElement("Panel",title + "C"));
+	panel2->setMetricsMode(Ogre::GMM_RELATIVE);    
+	panel2->setDimensions(0.2, 0.2);
+    panel2->setPosition(x, y);
+     
+	Ogre::TextAreaOverlayElement *textArea2 =static_cast<Ogre::TextAreaOverlayElement*>(overlayManager.createOverlayElement("TextArea", title + "E"));
+	textArea2->setMetricsMode(Ogre::GMM_RELATIVE);
+    textArea2->setPosition(0, 0);
+    textArea2->setDimensions(1, 1);
+	textArea2->setCaption(caption);
+    textArea2->setFontName("BlueHighway");
+    textArea2->setCharHeight(0.02f);
+	panel2->addChild(textArea2);
+	mTextGUI->add2D(panel2);
+
+}
+
+void Assignment1::createTextOverlay(Ogre::OverlayManager &overlayManager, Ogre::Real x, Ogre::Real y, Ogre::Real width, Ogre::Real height)
+{
+	mTextGUI = overlayManager.create( "TextArea" );	
+
+	Ogre::OverlayContainer * panela = static_cast<Ogre::OverlayContainer*>( overlayManager.createOverlayElement( "Panel", "TextBorder" ) );
+    panela->setPosition( x, y ); //0.75 , 0.01
+    panela->setDimensions( width, height ); //0.24, 0.35
+    panela->setMaterialName( "myBorder/TextBorder" );
+    mTextGUI->add2D( panela );
+
+////////////////////////////////////////////////////////
+	Ogre::Real x1 = 0.8;
+	Ogre::Real x2 = 0.88;
+	Ogre::Real y1 = 0.05;
+	Ogre::Real ySep = 0.04;
+
+	createTextElement(overlayManager, "Dummy", "", 0.8, 0.1); //first doesnt show, wp ogre
+	
+	createTextElement(overlayManager, "Name		:", "Name", x1, y1);
+	createTextElement(overlayManager, "State	:", "State", x1, y1 + ySep);
+	createTextElement(overlayManager, "Position	:", "Position", x1, y1 + 2 * ySep);
+	createTextElement(overlayManager, "Powerups	:", "Powerups", x1, y1 + 3 * ySep);
+	
+	createTextElement(overlayManager, "NameV", "Bob the tank", x2, y1);
+	createTextElement(overlayManager, "StateV", "Idle", x2, y1 + ySep);
+	createTextElement(overlayManager, "PositionV", "0,0,0", x2, y1 + 2 * ySep);
+	createTextElement(overlayManager, "PowerupsV", "None", x2, y1 + 3 * ySep);
+          
+	mTextGUI->show();
+	
+}
+
+void Assignment1::createHealthBlock(Ogre::OverlayManager &overlayManager, Ogre::String title, Ogre::Real x, Ogre::Real y, Ogre::Real width, Ogre::Real height)
+{
+	Ogre::OverlayContainer * panel = static_cast<Ogre::OverlayContainer*>( overlayManager.createOverlayElement( "Panel", title ) );
+    panel->setPosition( x, y );
+    panel->setDimensions( width, height);
+    panel->setMaterialName( "myMaterial/HealthBlock" );
+    
+	mHealthBar->add2D( panel );
+}
+
+void Assignment1::createHealthOverlay(Ogre::OverlayManager &overlayManager, Ogre::Real x, Ogre::Real y, Ogre::Real width, Ogre::Real height)
+{
+	mHealthBar = overlayManager.create( "HealthBar" );	
+
+	Ogre::Real xstart = x; //0.74
+	Ogre::Real ystart = y; //0.38
+	Ogre::Real xwidth = (width-0.005)/20; //0.01175 = (0.24-0.005)/20
+	Ogre::Real yheight = height; //0.04
+
+	Ogre::OverlayContainer * panela = static_cast<Ogre::OverlayContainer*>( overlayManager.createOverlayElement( "Panel", "HealthBorder" ) );
+    panela->setPosition( xstart + xwidth - 0.0025, ystart - 0.005 );
+    panela->setDimensions( xwidth*20 + 0.005, yheight + 0.01 );
+    panela->setMaterialName( "myBorder/HealthBorder" );
+    mHealthBar->add2D( panela );
+
+
+
+	for (int i = 1; i < 21; i++)
+	{
+		std::ostringstream oss;
+		oss << i; 
+
+		createHealthBlock(overlayManager, "Health" + oss.str(), xstart + i * xwidth, ystart, xwidth, yheight);
+	}
+
+	mHealthBar->show();
+}
+
+void Assignment1::updateTextOverlay()
+{
+	mTextGUI->getChild("NameVC")->getChild("NameVE")->setCaption("Test");
+	mTextGUI->getChild("StateVC")->getChild("StateVE")->setCaption("Test");
+	mTextGUI->getChild("PositionVC")->getChild("PositionVE")->setCaption("Test");
+	mTextGUI->getChild("PowerupsVC")->getChild("PowerupsVE")->setCaption("Test");
+
+}
+
+void Assignment1::updateHealthOverlay(int health)
+{
+	health *= 2;
+	int visHealth; //how many health blocks to show
+
+	visHealth = 1 + (health-1)/10;
+
+	for (int i = 1; i < visHealth + 1; i++)
+	{
+		std::ostringstream oss;
+		oss << i; 
+		mHealthBar->getChild("Health" + oss.str())->show();
+	}
+
+	for (int i = visHealth + 1; i < 21; i++)
+	{
+		std::ostringstream oss;
+		oss << i; 
+		mHealthBar->getChild("Health" + oss.str())->hide();
+	}
+}
+
+
+
+
+
 
  
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
