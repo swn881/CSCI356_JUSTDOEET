@@ -131,6 +131,13 @@ void Tank::takeDamage(const int& dmg){
 	if (isAlive())
 	{
 		hp -= (dmg / 100.0f);
+
+		//check if still dead
+		if (!isAlive())
+		{
+			mTankBodyNode->setVisible(false);
+		}
+
 		float healthBarAdjuster = (1.0 - hp) / 2;
 		mHealthBarBB->setTexcoordRect(0.0 + healthBarAdjuster, 0.0, 0.5 + healthBarAdjuster, 1.0);
 	}
@@ -148,9 +155,10 @@ void Tank::detachCamera(Ogre::Camera* camera){
 
 void Tank::setPossessed(bool possessed){
 	if(possessed){
+		savedState = currentState;
 		currentState = POSSESSED;
 	} else{
-		currentState = WANDER;
+		currentState = savedState;
 	}
 }
 

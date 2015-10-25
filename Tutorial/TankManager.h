@@ -108,7 +108,9 @@ private:
 		{
 			A_STAR, SEEK, WANDER, ESCAPE, STOP, POSSESSED
 		};
+
 		TankBodyStates currentState;
+		TankBodyStates savedState;
 
 		//wee added here FUNCTIONS 
 		void createPath(Ogre::ManualObject* line, float height, std::vector<int>& path, Ogre::ColourValue& colour);
