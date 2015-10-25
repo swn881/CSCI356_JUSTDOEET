@@ -1,0 +1,248 @@
+material myMaterial/CrateMaterial
+{
+	technique
+	{
+		pass
+		{
+			diffuse 0.8 0.8 0.8
+			specular 0.6 0.6 0.6
+
+			texture_unit
+			{
+				texture crate.jpg
+			}
+		}
+	}
+}
+
+material myMaterial/NoTexture
+{
+	technique
+	{
+		pass
+		{
+			diffuse 0.2 0.7 1.0
+			specular 0.8 0.2 0.2
+		}
+	}
+}
+
+material myMaterial/NoLighting
+{
+	technique
+	{
+		pass
+		{
+			lighting off
+		}
+	}
+}
+
+material myMaterial/MetalPlate
+{
+	technique
+	{
+		pass
+		{
+			texture_unit
+			{
+				texture MtlPlat2.jpg
+			}
+		}
+	}
+}
+
+material myMaterial/HealthBar
+{
+	receive_shadows off
+
+	technique
+	{
+		pass
+		{
+			lighting off
+
+			texture_unit
+			{
+				texture healthbar.png
+				colour_op replace
+			}
+		}
+	}
+}
+
+material myMaterial/SelectionCircle
+{
+	receive_shadows off
+
+	technique
+	{
+		pass
+		{
+			scene_blend alpha_blend
+			depth_write off
+			lighting off
+
+			texture_unit
+			{
+				texture circulo.png
+				//colour_op alpha_blend
+			}
+		}
+	}
+}
+
+material myMaterial/Bullet1
+{
+	receive_shadows off
+
+	technique
+	{
+		pass
+		{
+			lighting off
+			scene_blend alpha_blend 
+
+			texture_unit
+			{
+				texture bullet1.png
+			}
+		}
+	}
+}
+
+material myMaterial/Bullet2
+{
+	receive_shadows off
+
+	technique
+	{
+		pass
+		{
+			lighting off
+			scene_blend alpha_blend 
+
+			texture_unit
+			{
+				texture bullet2.png
+			}
+		}
+	}
+}
+
+material myMaterial/Bullet3
+{
+	receive_shadows off
+
+	technique
+	{
+		pass
+		{
+			lighting off
+			scene_blend alpha_blend 
+
+			texture_unit
+			{
+				texture bullet3.png
+			}
+		}
+	}
+}
+
+material myMaterial/Bullet4
+{
+	receive_shadows off
+
+	technique
+	{
+		pass
+		{
+			lighting off
+			scene_blend alpha_blend 
+
+			texture_unit
+			{
+				texture bullet4.png
+			}
+		}
+	}
+}
+
+material myMaterial/Bullet5
+{
+	receive_shadows off
+
+	technique
+	{
+		pass
+		{
+			lighting off
+			scene_blend alpha_blend 
+
+			texture_unit
+			{
+				texture bullet5.png
+			}
+		}
+	}
+}
+
+material myMaterial/BulletBorder
+{
+	receive_shadows off
+
+	technique
+	{
+		pass
+		{
+			lighting off
+			scene_blend alpha_blend 
+
+			texture_unit
+			{
+				texture bulletBorder.png
+			}
+		}
+	}
+}
+
+
+material myMaterial/Snowflake
+{
+	technique
+	{
+		pass
+		{
+			emissive 0.3 0.3 0.3
+			scene_blend alpha_blend
+			depth_write off
+			diffuse vertexcolour
+			lighting off
+
+			texture_unit
+			{
+				texture snowflake-transparent-background-snowflake-47-512.gif
+			}
+		}
+	}
+}
+
+material myMaterial/Droplet
+{
+	technique
+	{
+		pass
+		{
+			emissive 0.3 0.3 0.3
+			scene_blend colour_blend
+			depth_write off
+			diffuse vertexcolour
+			lighting off
+
+			texture_unit
+			{
+				texture basic_droplet.png
+			}
+		}
+	}
+}

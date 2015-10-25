@@ -1,0 +1,19 @@
+
+material bullet/Nonebullet.p
+{
+	technique
+	{
+		pass
+		{
+			lighting off
+			scene_blend alpha_blend 
+
+			texture_unit
+			{
+				texture bullet.png
+			}
+		}
+
+	}
+
+}

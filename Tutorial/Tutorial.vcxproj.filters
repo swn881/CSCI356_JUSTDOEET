@@ -1,0 +1,151 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Configuration Files">
+      <UniqueIdentifier>{cd14b25a-151a-4d1b-9375-87a75076bc81}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Pathfinding">
+      <UniqueIdentifier>{27fa240d-4d07-4fc6-867c-223d4235dafa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Pathfinding">
+      <UniqueIdentifier>{d5edaa55-76d3-429e-a3d5-545889e5e667}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Media">
+      <UniqueIdentifier>{501dd42f-55ec-40dc-b2f5-9a8c36474800}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\sounds">
+      <UniqueIdentifier>{8c339889-86f0-4efa-bb30-258b8da995e7}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="BaseApplication.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Connection.h">
+      <Filter>Header Files\Pathfinding</Filter>
+    </ClInclude>
+    <ClInclude Include="Graph.h">
+      <Filter>Header Files\Pathfinding</Filter>
+    </ClInclude>
+    <ClInclude Include="NodeRecord.h">
+      <Filter>Header Files\Pathfinding</Filter>
+    </ClInclude>
+    <ClInclude Include="PathFinding.h">
+      <Filter>Header Files\Pathfinding</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GroupAssignment.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ProjectileManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TankManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PowerUpSpawn.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundPlayer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="BaseApplication.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Connection.cpp">
+      <Filter>Source Files\Pathfinding</Filter>
+    </ClCompile>
+    <ClCompile Include="Graph.cpp">
+      <Filter>Source Files\Pathfinding</Filter>
+    </ClCompile>
+    <ClCompile Include="NodeRecord.cpp">
+      <Filter>Source Files\Pathfinding</Filter>
+    </ClCompile>
+    <ClCompile Include="PathFinding.cpp">
+      <Filter>Source Files\Pathfinding</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GroupAssignment.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ProjectileManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TankManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PowerUpSpawn.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundPlayer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ogre.cfg">
+      <Filter>Configuration Files</Filter>
+    </None>
+    <None Include="plugins.cfg">
+      <Filter>Configuration Files</Filter>
+    </None>
+    <None Include="plugins_d.cfg">
+      <Filter>Configuration Files</Filter>
+    </None>
+    <None Include="resources.cfg">
+      <Filter>Configuration Files</Filter>
+    </None>
+    <None Include="resources_d.cfg">
+      <Filter>Configuration Files</Filter>
+    </None>
+    <None Include="media\scripts\bullet.material">
+      <Filter>Resource Files\Media</Filter>
+    </None>
+    <None Include="media\scripts\healthup.material">
+      <Filter>Resource Files\Media</Filter>
+    </None>
+    <None Include="media\scripts\lightning_bolt.material">
+      <Filter>Resource Files\Media</Filter>
+    </None>
+    <None Include="media\scripts\myMaterial.material">
+      <Filter>Resource Files\Media</Filter>
+    </None>
+    <None Include="media\scripts\myParticles.particle">
+      <Filter>Resource Files\Media</Filter>
+    </None>
+    <None Include="media\scripts\podium.material">
+      <Filter>Resource Files\Media</Filter>
+    </None>
+    <None Include="media\scripts\tyre.material">
+      <Filter>Resource Files\Media</Filter>
+    </None>
+    <None Include="media\sounds\fire.flac">
+      <Filter>Resource Files\sounds</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="media\sounds\explosion.wav">
+      <Filter>Resource Files\sounds</Filter>
+    </Media>
+    <Media Include="media\sounds\moving_truck.mp3">
+      <Filter>Resource Files\sounds</Filter>
+    </Media>
+  </ItemGroup>
+</Project>
