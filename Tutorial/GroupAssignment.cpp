@@ -341,6 +341,14 @@ bool GroupAssignment::keyPressed( const OIS::KeyEvent &arg )
 			mShutDown = true;
 		break;
 		//////////////////////////////DANNI CODE
+		case OIS::KC_U:
+		{
+			testhealth = rand() % 95 + 5;
+			printf("Health: %d\n", testhealth); 
+		}
+		break;
+
+		
 		case OIS::KC_V:
 			controlWeather();
 		break;		
