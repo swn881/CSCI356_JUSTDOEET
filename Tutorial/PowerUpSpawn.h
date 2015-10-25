@@ -25,7 +25,7 @@ public:
 	void update(Ogre::SceneManager* ScnMgr, float deltaTime);
 	char pickupPowerUp(Ogre::SceneManager* ScnMgr); //will need to pass the appropriate "tank" to this function to modify it
 
-	void createPowerUp(Ogre::SceneManager* ScnMgr, char type);	//call initially and whenever we want to create a powerup, make private //changed to public
+	void createPowerUp(Ogre::SceneManager* ScnMgr, char settype);	//call initially and whenever we want to create a powerup, make private //changed to public
 	bool getIsPowerUp();
 };
 

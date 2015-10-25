@@ -1,0 +1,56 @@
+material myIcon/Bolt
+{
+	receive_shadows off
+
+	technique
+	{
+		pass
+		{
+			lighting off
+			scene_blend alpha_blend 
+
+			texture_unit
+			{
+				texture bolticon.png
+			}
+		}
+	}
+}
+
+material myIcon/Nuke
+{
+	receive_shadows off
+
+	technique
+	{
+		pass
+		{
+			lighting off
+			scene_blend alpha_blend 
+
+			texture_unit
+			{
+				texture nukeicon.png
+			}
+		}
+	}
+}
+
+material myIcon/Wheel
+{
+	receive_shadows off
+
+	technique
+	{
+		pass
+		{
+			lighting off
+			scene_blend alpha_blend 
+
+			texture_unit
+			{
+				texture wheelicon.png
+			}
+		}
+	}
+}

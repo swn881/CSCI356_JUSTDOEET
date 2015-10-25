@@ -224,8 +224,8 @@ void GroupAssignment::createScene(void)
 
 	Ogre::OverlayManager &overlayManager = Ogre::OverlayManager::getSingleton();
 	createReloadOverlay(overlayManager);
-	createTextOverlay(overlayManager, 0.75, 0.01, 0.24, 0.35);
-	createHealthOverlay(overlayManager, 0.74, 0.38, 0.24, 0.04);
+	createTextOverlay(overlayManager, 0.75, 0.01, 0.24, 0.33);
+	createHealthOverlay(overlayManager, 0.74, 0.36, 0.24, 0.04);
 	
 
 	/*
@@ -293,11 +293,15 @@ bool GroupAssignment::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	//also needs a check for if we change which tank is selected
 	
 	
-	if (mTextGUI->isVisible())
+	if (mTextGUI->isVisible() && selectedTank != NULL)
 	{
 		updateTextOverlay();
 		updateReloadOverlay(mWeaponTimer);
-		updateHealthOverlay(testhealth); //pass the health
+		if (mPrevHealth != selectedTank->hp)
+		{
+			mPrevHealth = selectedTank->hp;
+			updateHealthOverlay(selectedTank->hp); //pass the health
+		}
 	}	
 	updatePowerUps(evt.timeSinceLastFrame);
 
@@ -343,8 +347,7 @@ bool GroupAssignment::keyPressed( const OIS::KeyEvent &arg )
 		//////////////////////////////DANNI CODE
 		case OIS::KC_U:
 		{
-			testhealth = rand() % 95 + 5;
-			printf("Health: %d\n", testhealth); 
+			printf("Health: %f\n", selectedTank->hp); 
 		}
 		break;
 
@@ -396,6 +399,10 @@ bool GroupAssignment::keyPressed( const OIS::KeyEvent &arg )
 				inTankMode = false;
 				mTrayMgr->showCursor();
 				selectedTank->setPossessed(false);
+				mTextGUI->hide();
+				mBulletAnimation->hide();
+				mHealthBar->hide();
+
 				//selectedTank = NULL;
 			}
 		break;
@@ -592,6 +599,14 @@ bool GroupAssignment::mousePressed( const OIS::MouseEvent &arg, OIS::MouseButton
 
 							if(selectedTank != NULL)
 							{
+								//GUI stuff
+								mTextGUI->show();
+								mBulletAnimation->show();
+								mHealthBar->show();
+								mPrevHealth = selectedTank->hp;
+								updateHealthOverlay(selectedTank->hp);
+								updateTextOverlay();
+
 								selectedTank->attachCamera(mCamera);
 								inTankMode = true;
 								mTrayMgr->hideCursor();
@@ -751,9 +766,9 @@ void GroupAssignment::createReloadOverlay(Ogre::OverlayManager &overlayManager)
 {
 	mBulletAnimation = overlayManager.create( "BulletAnimation" );
 
-	Ogre::Real xstart = 0.79;
+	Ogre::Real xstart = 0.80;
 	Ogre::Real xwidth = 0.025;
-	Ogre::Real ystart = 0.4475;
+	Ogre::Real ystart = 0.4275;
 	Ogre::Real yheight = 0.05;
 
 	Ogre::OverlayContainer * panel = static_cast<Ogre::OverlayContainer*>( overlayManager.createOverlayElement( "Panel", "BulletBorder" ) );
@@ -798,8 +813,8 @@ void GroupAssignment::createReloadOverlay(Ogre::OverlayManager &overlayManager)
 	panel->hide();
     mBulletAnimation->add2D( panel );
 
-    // Show the overlay
-    mBulletAnimation->show();
+    // Hide the overlay
+    mBulletAnimation->hide();
 }
 
 void GroupAssignment::updateReloadOverlay(double time)
@@ -903,9 +918,12 @@ void GroupAssignment::createTextOverlay(Ogre::OverlayManager &overlayManager, Og
     panela->setMaterialName( "myBorder/TextBorder" );
     mTextGUI->add2D( panela );
 
+
+
 ////////////////////////////////////////////////////////
-	Ogre::Real x1 = 0.8;
-	Ogre::Real x2 = 0.88;
+	Ogre::Real x1 = 0.78;
+	Ogre::Real x2 = 0.86;
+	Ogre::Real x3 = x2 + 0.03;
 	Ogre::Real y1 = 0.05;
 	Ogre::Real ySep = 0.04;
 
@@ -919,9 +937,30 @@ void GroupAssignment::createTextOverlay(Ogre::OverlayManager &overlayManager, Og
 	createTextElement(overlayManager, "NameV", "Bob the tank", x2, y1);
 	createTextElement(overlayManager, "StateV", "Idle", x2, y1 + ySep);
 	createTextElement(overlayManager, "PositionV", "0,0,0", x2, y1 + 2 * ySep);
-	createTextElement(overlayManager, "PowerupsV", "None", x2, y1 + 3 * ySep);
-          
-	mTextGUI->show();
+	createTextElement(overlayManager, "RPowerupsV", "None", x3, y1 + 3 * ySep);
+	createTextElement(overlayManager, "SPowerupsV", "None", x3, y1 + 4 * ySep);
+	createTextElement(overlayManager, "PPowerupsV", "None", x3, y1 + 5 * ySep);
+
+	panela = static_cast<Ogre::OverlayContainer*>( overlayManager.createOverlayElement( "Panel", "BoltIcon" ) );
+    panela->setPosition( x2, y1 + 3 * ySep);
+    panela->setDimensions( 0.02, 0.02 );
+    panela->setMaterialName( "myIcon/Bolt" );
+    mTextGUI->add2D( panela );
+
+	panela = static_cast<Ogre::OverlayContainer*>( overlayManager.createOverlayElement( "Panel", "SpeedIcon" ) );
+    panela->setPosition( x2, y1 + 4 * ySep);
+    panela->setDimensions( 0.02, 0.02 );
+    panela->setMaterialName( "myIcon/Wheel" );
+    mTextGUI->add2D( panela );
+
+
+  	panela = static_cast<Ogre::OverlayContainer*>( overlayManager.createOverlayElement( "Panel", "NukeIcon" ) );
+    panela->setPosition( x2, y1 + 5 * ySep);
+    panela->setDimensions( 0.02, 0.02 );
+    panela->setMaterialName( "myIcon/Nuke" );
+    mTextGUI->add2D( panela );
+
+	mTextGUI->hide();
 	
 }
 
@@ -960,24 +999,49 @@ void GroupAssignment::createHealthOverlay(Ogre::OverlayManager &overlayManager, 
 		createHealthBlock(overlayManager, "Health" + oss.str(), xstart + i * xwidth, ystart, xwidth, yheight);
 	}
 
-	mHealthBar->show();
+	mHealthBar->hide();
 }
 
 void GroupAssignment::updateTextOverlay()
 {
+	//Name
 	mTextGUI->getChild("NameVC")->getChild("NameVE")->setCaption("Test");
-	mTextGUI->getChild("StateVC")->getChild("StateVE")->setCaption("Test");
-	mTextGUI->getChild("PositionVC")->getChild("PositionVE")->setCaption("Test");
-	mTextGUI->getChild("PowerupsVC")->getChild("PowerupsVE")->setCaption("Test");
+	//State
+	mTextGUI->getChild("StateVC")->getChild("StateVE")->setCaption(	selectedTank->getState());
 
+	//Position
+	std::ostringstream oss;
+	Ogre::Vector3 pos = selectedTank->getPosition();
+	oss << '(' << (int)pos.x << ',' << (int)pos.y << ',' << (int)pos.z << ')';
+	mTextGUI->getChild("PositionVC")->getChild("PositionVE")->setCaption(oss.str());
+
+	//Powerups
+	oss.str("");
+	oss.clear();
+	
+	oss << selectedTank->powerUpDurationR;
+	mTextGUI->getChild("RPowerupsVC")->getChild("RPowerupsVE")->setCaption(oss.str());
+	oss.str("");
+	oss.clear();
+	
+	oss << selectedTank->powerUpDurationS;
+	mTextGUI->getChild("SPowerupsVC")->getChild("SPowerupsVE")->setCaption(oss.str());
+
+	oss.str("");
+	oss.clear();
+	
+	oss << selectedTank->powerUpDurationP;
+	mTextGUI->getChild("PPowerupsVC")->getChild("PPowerupsVE")->setCaption(oss.str());
+
+		
 }
 
-void GroupAssignment::updateHealthOverlay(int health)
+void GroupAssignment::updateHealthOverlay(float health)
 {
-	health *= 2;
+	int x = health * 200;
 	int visHealth; //how many health blocks to show
 
-	visHealth = 1 + (health-1)/10;
+	visHealth = 1 + (x-1)/10;
 
 	for (int i = 1; i < visHealth + 1; i++)
 	{

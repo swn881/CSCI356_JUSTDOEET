@@ -30,6 +30,7 @@ public:
 	void attachCamera(Ogre::Camera* camera);
 	void detachCamera(Ogre::Camera* camera);
 	void setPossessed(bool possessed);
+	Ogre::String getState();
 
 	Ogre::Degree getShootingAngle(const Ogre::Vector3& targetTank);
 
@@ -39,7 +40,7 @@ public:
 
 	float hp;
 	//Mode mode; //the movement mode that the tank is currently in
-	float powerUpDuration;
+	float powerUpDurationR, powerUpDurationS, powerUpDurationP;
 	float deathTimer;
 	
 	float ms; //movement speed
@@ -84,6 +85,7 @@ private:
 	float wanderAngle;
 	float ANGLE_CHANGE;
 
+	void decrementPowerups(const float& deltaTime);
 	void wander(const float&);
 	void seek(const Ogre::Vector3& target, const float& deltaTime);
 

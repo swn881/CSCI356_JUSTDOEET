@@ -26,11 +26,11 @@ bool PowerUpSpawn::getIsPowerUp()
 	return isPowerUp;
 }
 
-void PowerUpSpawn::createPowerUp(Ogre::SceneManager* ScnMgr, char type) //call initially and whenever we want to create a powerup
+void PowerUpSpawn::createPowerUp(Ogre::SceneManager* ScnMgr, char settype) //call initially and whenever we want to create a powerup
 {
 	isPowerUp = true;
 
-	if (type == '?') //random powerup
+	if (settype == '?') //random powerup
 	{
 		int x = rand() % 4;
 		if (x == 0)
@@ -42,6 +42,8 @@ void PowerUpSpawn::createPowerUp(Ogre::SceneManager* ScnMgr, char type) //call i
 		else if (x == 3)
 			type = 'P';
 	}
+	else
+		type = settype;
 
 	std::ostringstream oss;
 	oss << ++entityCounter;
@@ -55,6 +57,7 @@ void PowerUpSpawn::createPowerUp(Ogre::SceneManager* ScnMgr, char type) //call i
 			powerUp = ScnMgr->createEntity(name, "healthup.mesh");
 			powerNode->attachObject(powerUp);
 			powerNode->setScale(500, 100, 80);
+
 			break;
 		}
 		case ('R'): //projectile firerate
@@ -70,14 +73,12 @@ void PowerUpSpawn::createPowerUp(Ogre::SceneManager* ScnMgr, char type) //call i
 			powerNode->attachObject(powerUp);
 			powerNode->setScale(75, 75, 50);
 			break;
-			break;
 		}
 		case ('P'): //projectile damage
 		{
 			powerUp = ScnMgr->createEntity(name, "bullet.mesh");
 			powerNode->attachObject(powerUp);
 			powerNode->setScale(35, 50, 50);
-			break;
 			break;
 		}
 		default:

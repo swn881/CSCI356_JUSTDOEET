@@ -63,7 +63,10 @@ Tank::Tank(Ogre::BillboardSet* healthBar, Ogre::BillboardSet* selectionCircle,
 
 void Tank::resetAll(void){
 	hp = 1.0f;
-	powerUpDuration = 0.f;
+	powerUpDurationP = 0.f;
+	powerUpDurationS = 0.f;
+	powerUpDurationR = 0.f;
+
 	deathTimer = 5.f;
 	mDestination = Ogre::Vector3::ZERO;
 	mDirection = Ogre::Vector3::ZERO;
@@ -154,6 +157,35 @@ void Tank::setPossessed(bool possessed){
 	}
 }
 
+Ogre::String Tank::getState()
+{
+	if(currentState == POSSESSED)
+	{
+		return "Possessed";
+	}
+	else if(currentState == A_STAR)
+	{
+		return "A STAR";
+	}
+	else if (currentState == SEEK)
+	{
+		return "Seeking";
+	}
+	else if (currentState == WANDER)
+	{
+		return "Wandering";
+	}
+	else if (currentState == ESCAPE)
+	{
+		return "Escaping";
+	}
+	else if (currentState == STOP)
+	{
+		return "Stopped";
+	}
+}
+
+
 bool Tank::isAlive(void){
 	return hp > 0.f;
 }
@@ -167,6 +199,42 @@ Ogre::Degree Tank::getShootingAngle(const Ogre::Vector3& targetTank){
 	return Ogre::Degree(0.5f * Ogre::Math::ASin(inner));
 }
 
+void Tank::decrementPowerups(const float& deltaTime)
+{
+	if (powerUpDurationR > 0.f)
+	{
+		powerUpDurationR -= deltaTime;
+
+		if (powerUpDurationR <= 0.f)
+		{
+			fireRate = 2.f;
+			powerUpDurationR = 0.f;
+		}
+	}
+	if (powerUpDurationS > 0.f)
+	{
+		powerUpDurationS -= deltaTime;
+
+		if (powerUpDurationS <= 0.f)
+		{
+			ms = 70.f;
+			powerUpDurationS = 0.f;
+
+		}
+	}
+
+	if (powerUpDurationP > 0.f)
+	{
+		powerUpDurationP -= deltaTime;
+
+		if (powerUpDurationP <= 0.f)
+		{
+			dmg = 15;
+			powerUpDurationP = 0.f;
+		}
+	}
+
+}
 void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpawns){
 	
 	//this check must be first
@@ -206,6 +274,7 @@ void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpa
 		return;
 	}
 
+	//Check for tank powerups
 	sphereSceneTime += deltaTime;
 	if(sphereSceneTime > 0.2)
 	{
@@ -218,7 +287,7 @@ void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpa
 		for(int i = 0; i < mPowerUpSpawns.size(); i++)
 		{
 			Ogre::Vector3 powerUpLocation = mPowerUpSpawns[i]->spawnNode->getPosition();
-			if(tankCenter.distance(powerUpLocation) < 50)
+			if(tankCenter.squaredDistance(powerUpLocation) < 5625) //squaredDistance is better
 			{
 				std::cout << 111 << std::endl;
 				found = true;
@@ -230,35 +299,45 @@ void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpa
 			if(mPowerUpSpawns[location]->getIsPowerUp())
 			{
 				char tempType = mPowerUpSpawns[location]->pickupPowerUp(mSceneMgr);
+				
+				printf("Got Powerup %c\n", tempType);
 
 				switch(tempType)
 				{
-					case 'H': //health
+					case ('H'): //health
 					{
 						hp += 0.1f;
 						if (hp > 1.0f)
 						{
 							hp = 1.0f;
 						}
+						printf("Got Health\n");
+
+						//update healthbar
+						float healthBarAdjuster = (1.0 - hp) / 2;
+						mHealthBarBB->setTexcoordRect(0.0 + healthBarAdjuster, 0.0, 0.5 + healthBarAdjuster, 1.0);
 					}
 					break;
-					case 'R': //fire rate
+					case ('R'): //fire rate
 					{
 						fireRate = 1.f;
-						powerUpDuration = 4.f;
+						powerUpDurationR = 4.f;
 					}
 					break;
-					case 'S': //speed
+					case ('S'): //speed
 					{
 						ms = 90.f;
-						powerUpDuration = 4.f;
+						powerUpDurationS = 4.f;
 					}
 					break;
-					case 'P': //damage
+					case ('P'): //damage
 					{
 						dmg = 30.f;
-						powerUpDuration = 4.f;
+						powerUpDurationP = 4.f;
 					}
+					break;
+					default:
+						printf("Unknown Powerup\n");
 					break;
 				}
 			}
@@ -340,16 +419,7 @@ void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpa
 		sphereSceneTime = 0;
 	}
 	*/
-	if (powerUpDuration > 0.f)
-	{
-		powerUpDuration -= deltaTime;
-
-		if (powerUpDuration <= 0.f)
-		{
-			resetAttributes();
-		}
-	}
-
+	decrementPowerups(deltaTime);
 	//no movement for body yet
 	
 
@@ -547,7 +617,7 @@ void Tank::wander(const float& deltaTime){
 	float length = displacement.length();
 	displacement.x = cos(wanderAngle) * length;
    	displacement.z = sin(wanderAngle) * length;
-	displacement.y = 0;
+	displacement.y = 13;
 
    	std::uniform_real_distribution<double> randomGen;
 
@@ -640,7 +710,6 @@ Tank* TankManager::createTank(const Ogre::Vector3& position, int side, Graph* pa
 
 	Ogre::Entity* tankBody = mSceneMgr->createEntity(oss1.str(), "lpbody.mesh");
 	tankBody->setCastShadows(true);
-	tankBody->setMaterialName("lp_tank_material");
 
 	std::ostringstream oss2;
 	oss2 << "tankturret" << tankNumber;
@@ -648,7 +717,6 @@ Tank* TankManager::createTank(const Ogre::Vector3& position, int side, Graph* pa
 	// Create tank turret entity
 	Ogre::Entity* tankTurret = mSceneMgr->createEntity(oss2.str(), "lpturret.mesh");
 	tankTurret->setCastShadows(true);
-	tankTurret->setMaterialName("lp_tank_material");
 
 	std::ostringstream oss3;
 	oss3 << "tankbarrel" << tankNumber;
@@ -656,7 +724,6 @@ Tank* TankManager::createTank(const Ogre::Vector3& position, int side, Graph* pa
 	// Create tank barrel entity
 	Ogre::Entity* tankBarrel = mSceneMgr->createEntity(oss3.str(), "lpbarrel.mesh");
 	tankBarrel->setCastShadows(true);
-	tankBarrel->setMaterialName("lp_tank_material");
 
 	// Create a child scene node and attach tank body to it
 	Ogre::SceneNode* mTankBodyNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
@@ -668,6 +735,10 @@ Tank* TankManager::createTank(const Ogre::Vector3& position, int side, Graph* pa
 	float distance = 0.f;
 
 	if(side == 1){
+		tankBody->setMaterialName("lp_tank_materialred");
+		tankTurret->setMaterialName("lp_tank_materialred");
+		tankBarrel->setMaterialName("lp_tank_materialred");
+
 		mTankBodyNode->yaw(Ogre::Degree(180.f));
 		
 		for (std::vector<int>::iterator it = exitNodesA.begin(); it != exitNodesA.end(); it++)
@@ -706,6 +777,9 @@ Tank* TankManager::createTank(const Ogre::Vector3& position, int side, Graph* pa
 	}
 	else if(side == 2)
 	{
+		tankBody->setMaterialName("lp_tank_materialblue");
+		tankTurret->setMaterialName("lp_tank_materialblue");
+		tankBarrel->setMaterialName("lp_tank_materialblue");
 		
 		for (std::vector<int>::iterator it = exitNodesB.begin(); it != exitNodesB.end(); it++)
 		{
