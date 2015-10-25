@@ -759,7 +759,7 @@ void GroupAssignment::createReloadOverlay(Ogre::OverlayManager &overlayManager)
 	Ogre::OverlayContainer * panel = static_cast<Ogre::OverlayContainer*>( overlayManager.createOverlayElement( "Panel", "BulletBorder" ) );
     panel->setPosition( xstart, ystart );
     panel->setDimensions( xwidth*5 + 0.015, yheight+0.005 );
-    panel->setMaterialName( "myMaterial/BulletBorder" );
+    panel->setMaterialName( "myBorder/BulletBorder" );
     mBulletAnimation->add2D( panel );
 
 	//panel is Ogre::OverlayContainer* panel
@@ -874,7 +874,7 @@ void GroupAssignment::deletePowerUpSpawns()
 
 }
 
-void Assignment1::createTextElement(Ogre::OverlayManager &overlayManager, Ogre::String title, Ogre::String caption, Ogre::Real x, Ogre::Real y)
+void GroupAssignment::createTextElement(Ogre::OverlayManager &overlayManager, Ogre::String title, Ogre::String caption, Ogre::Real x, Ogre::Real y)
 {
 	Ogre::OverlayContainer * panel2 = static_cast<Ogre::OverlayContainer*>(overlayManager.createOverlayElement("Panel",title + "C"));
 	panel2->setMetricsMode(Ogre::GMM_RELATIVE);    
@@ -893,7 +893,7 @@ void Assignment1::createTextElement(Ogre::OverlayManager &overlayManager, Ogre::
 
 }
 
-void Assignment1::createTextOverlay(Ogre::OverlayManager &overlayManager, Ogre::Real x, Ogre::Real y, Ogre::Real width, Ogre::Real height)
+void GroupAssignment::createTextOverlay(Ogre::OverlayManager &overlayManager, Ogre::Real x, Ogre::Real y, Ogre::Real width, Ogre::Real height)
 {
 	mTextGUI = overlayManager.create( "TextArea" );	
 
@@ -925,7 +925,7 @@ void Assignment1::createTextOverlay(Ogre::OverlayManager &overlayManager, Ogre::
 	
 }
 
-void Assignment1::createHealthBlock(Ogre::OverlayManager &overlayManager, Ogre::String title, Ogre::Real x, Ogre::Real y, Ogre::Real width, Ogre::Real height)
+void GroupAssignment::createHealthBlock(Ogre::OverlayManager &overlayManager, Ogre::String title, Ogre::Real x, Ogre::Real y, Ogre::Real width, Ogre::Real height)
 {
 	Ogre::OverlayContainer * panel = static_cast<Ogre::OverlayContainer*>( overlayManager.createOverlayElement( "Panel", title ) );
     panel->setPosition( x, y );
@@ -935,7 +935,7 @@ void Assignment1::createHealthBlock(Ogre::OverlayManager &overlayManager, Ogre::
 	mHealthBar->add2D( panel );
 }
 
-void Assignment1::createHealthOverlay(Ogre::OverlayManager &overlayManager, Ogre::Real x, Ogre::Real y, Ogre::Real width, Ogre::Real height)
+void GroupAssignment::createHealthOverlay(Ogre::OverlayManager &overlayManager, Ogre::Real x, Ogre::Real y, Ogre::Real width, Ogre::Real height)
 {
 	mHealthBar = overlayManager.create( "HealthBar" );	
 
@@ -963,7 +963,7 @@ void Assignment1::createHealthOverlay(Ogre::OverlayManager &overlayManager, Ogre
 	mHealthBar->show();
 }
 
-void Assignment1::updateTextOverlay()
+void GroupAssignment::updateTextOverlay()
 {
 	mTextGUI->getChild("NameVC")->getChild("NameVE")->setCaption("Test");
 	mTextGUI->getChild("StateVC")->getChild("StateVE")->setCaption("Test");
@@ -972,7 +972,7 @@ void Assignment1::updateTextOverlay()
 
 }
 
-void Assignment1::updateHealthOverlay(int health)
+void GroupAssignment::updateHealthOverlay(int health)
 {
 	health *= 2;
 	int visHealth; //how many health blocks to show
