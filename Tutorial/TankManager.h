@@ -10,6 +10,7 @@
 #include "PowerUpSpawn.h"
 #include "SoundPlayer.h"
 
+
 class TankManager;
 class ProjectileManager;
 
@@ -17,7 +18,8 @@ struct Tank{
 public:
 	Tank(Ogre::BillboardSet* healthBar, Ogre::BillboardSet* selectionCircle,
 		 Ogre::SceneNode* tankBodyNode, Ogre::SceneNode* tankTurretNode, Ogre::SceneNode* tankBarrelNode, TankManager* tnkMgr,
-		 Graph* pathFindingGraph, PathFinding mPathFinder, Ogre::ManualObject* aStarPath, int tankSide, int goal, Ogre::SceneManager* mSceneMgr);
+		 Graph* pathFindingGraph, PathFinding mPathFinder, Ogre::ManualObject* aStarPath, int tankSide, Ogre::SceneManager* mSceneMgr,
+		 Ogre::Entity* , Ogre::Entity* , Ogre::Entity* );
 	void resetAll(void);
 	void resetAttributes(void);
 	Ogre::Vector3 getPosition(void);
@@ -68,8 +70,11 @@ private:
 	Ogre::Billboard* mSelectionCircleBB;
 	
 	Ogre::SceneNode* mTankBodyNode;
+	Ogre::Entity* tankBody;
 	Ogre::SceneNode* mTankTurretNode;
+	Ogre::Entity* tankTurret;
 	Ogre::SceneNode* mTankBarrelNode;
+	Ogre::Entity* tankBarrel;
 
 	Ogre::SceneNode* thirdPersonCamNode;
 
@@ -115,16 +120,37 @@ private:
 		TankBodyStates currentState;
 		TankBodyStates savedState;
 
+		//vector that represents the exit
+		std::vector<int> exitNodesA;
+		std::vector<int> exitNodesB;
+
 		//wee added here FUNCTIONS 
 		void createPath(Ogre::ManualObject* line, float height, std::vector<int>& path, Ogre::ColourValue& colour);
 		void aStar();
 		bool nextLocation();
 		void aStarMovement(const float&);
+		void findShortestExit(); //give me the shortest exits based on the side you are currenty in
 
 		//wee added end
 	bool selected;
 	void rotateTank(void);
+
+	
 };
+
+/*
+
+	Ogre::Vector3 sideBMazeTopRightCorner = Ogre::Vector3(2125, 13.0f, 2125);
+	Ogre::Vector3 sideBMazeTopLeftCorner = Ogre::Vector3(625, 13.0f, 2125);
+	Ogre::Vector3 sideBMazeBotRightCorner = Ogre::Vector3(2125, 13.0f, -2125);
+	Ogre::Vector3 sideBMazeBotLeftCorner = Ogre::Vector3(625, 13.0f, -2125);
+
+	Ogre::Vector3 sideAMazeTopLeftCorner = Ogre::Vector3(-2125, 13.0f, 2125);
+	Ogre::Vector3 sideAMazeTopRightCorner = Ogre::Vector3(-625, 13.0f, 2125);
+	Ogre::Vector3 sideAMazeBotLeftCorner = Ogre::Vector3(-2125, 13.0f, -2125);
+	Ogre::Vector3 sideAMazeBotRightCorner = Ogre::Vector3(-625, 13.0f, -2125);
+
+*/
 
 #pragma once
 class TankManager
@@ -156,9 +182,7 @@ private:
 	Ogre::SceneManager* mSceneMgr;
 	std::set<Tank*> tankSideA;
 	std::set<Tank*> tankSideB;
-	//vector that represents the exit
-	std::vector<int> exitNodesA;
-	std::vector<int> exitNodesB;
+
 	std::list<Tank*> selectedTanks;
 	int numSelected;
 	

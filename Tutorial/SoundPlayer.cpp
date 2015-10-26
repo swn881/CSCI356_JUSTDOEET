@@ -39,10 +39,14 @@ void SoundPlayer::playExplosionSound(){
 }
 
 void SoundPlayer::playMovingTank(){
-	engine->play2D("media/sounds/moving_truck.wav");
+	engine->play2D("media/sounds/moving_truck.wav", true);
 
 }
 
+void SoundPlayer::stopSounds()
+{
+	engine->stopAllSounds();
+}
 
 ISound* SoundPlayer::playMovingTankSound(const Ogre::Vector3& position){
 	ISound* sound = engine->play3D(movingTankSound, convert(position), true, false, true, false);

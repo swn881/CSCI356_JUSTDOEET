@@ -105,6 +105,7 @@ void GroupAssignment::createScene(void)
 	entGround->setCastShadows(false);
 	entGround->setQueryFlags(0);
 
+	std::vector<int> walls;
 	int rowCheck = 0;
 	// go through the graph
 	// if a node is blocked, display a cube on that grid location
@@ -129,6 +130,7 @@ void GroupAssignment::createScene(void)
 			rowCheck = 0;
 		}
 		*/
+		
 		if(contents)
 		{
 			// Create unique name
@@ -149,6 +151,7 @@ void GroupAssignment::createScene(void)
 			Ogre::Vector3 position = pathFindingGraph->getPosition(nodeNumber);
 			position.y = 50;
 			myNode->translate(position);
+			walls.push_back(nodeNumber);
 		}
 		else
 		{
@@ -404,6 +407,8 @@ bool GroupAssignment::keyPressed( const OIS::KeyEvent &arg )
 				mBulletAnimation->hide();
 				mHealthBar->hide();
 
+				soundPlayer->stopSounds();
+
 				//selectedTank = NULL;
 			}
 		break;
@@ -614,6 +619,8 @@ bool GroupAssignment::mousePressed( const OIS::MouseEvent &arg, OIS::MouseButton
 								inTankMode = true;
 								mTrayMgr->hideCursor();
 								selectedTank->setPossessed(true);
+
+								soundPlayer->playMovingTank();
 							}
 						}
 					}

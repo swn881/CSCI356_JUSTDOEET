@@ -3,13 +3,17 @@
 
 Tank::Tank(Ogre::BillboardSet* healthBar, Ogre::BillboardSet* selectionCircle,
 		   Ogre::SceneNode* tankBodyNode, Ogre::SceneNode* tankTurretNode, Ogre::SceneNode* tankBarrelNode, TankManager* tnkMgr,
-		   Graph* pathFindingGraph, PathFinding mPathFinder, Ogre::ManualObject* aStarPath, int side, int goal, Ogre::SceneManager* mSceneMgr){
+		   Graph* pathFindingGraph, PathFinding mPathFinder, Ogre::ManualObject* aStarPath, int side, Ogre::SceneManager* mSceneMgr,
+		   Ogre::Entity* body, Ogre::Entity* turret, Ogre::Entity* barrel){
 	//wee added 3 lines
 	this->pathFindingGraph = pathFindingGraph;
 	this->mPathFinder = mPathFinder;
 	this->aStarPath = aStarPath;
 	this->tankSide = side;
-	this->goalNode = goal;
+	this->tankBody = body;
+	this->tankTurret = turret;
+	this->tankBarrel = barrel;
+
 	this->mSceneMgr = mSceneMgr;
 
 	this->tnkMgr = tnkMgr;
@@ -55,12 +59,23 @@ Tank::Tank(Ogre::BillboardSet* healthBar, Ogre::BillboardSet* selectionCircle,
 	camTarget.y += 30;
 	thirdPersonCamNode->lookAt(camTarget, Ogre::Node::TransformSpace::TS_LOCAL);
 
-	
+	//sphere scene query
 	tankSphere.setRadius(62.5f);
 
 	ssq = mSceneMgr->createSphereQuery(tankSphere, Ogre::SceneManager::ENTITY_TYPE_MASK);
 
-	tankSound = tnkMgr->soundPlayer->playMovingTankSound(tankBodyNode->getPosition());
+	//exit nodes
+	exitNodesA.push_back(121);
+	exitNodesA.push_back(337);
+	exitNodesA.push_back(517);
+	exitNodesA.push_back(769);
+	exitNodesA.push_back(1201);
+
+	exitNodesB.push_back(94);
+	exitNodesB.push_back(418);
+	exitNodesB.push_back(598);
+	exitNodesB.push_back(922);
+	exitNodesB.push_back(1246);
 }
 
 void Tank::resetAll(void){
@@ -84,7 +99,9 @@ void Tank::resetAll(void){
 	pathCreated = false;
 	mMoveSpd = 70.0; 
 	mRotSpd = 50.0; 
-
+	//!!!
+	mWalkList.clear();
+	aStarPath->clear();
 	tankStarted = false;
 	mDistance = 0;
 	currentState = A_STAR;
@@ -167,6 +184,35 @@ void Tank::setPossessed(bool possessed){
 	} else{
 		currentState = savedState;
 	}
+	/*
+	//check coordinates
+	Ogre::Vector3 tempCoor = mTankBodyNode->getPosition();
+
+	if(tankSide == 1)
+	{
+		//we check if we want to do aStar or not 
+		if(tempCoor.x > -2125 && tempCoor.x < -625)
+		{
+			if(tempCoor.z > -2125 && tempCoor.z < 2125)
+			{
+				//means we are near the spawn point of side A
+				currentState = A_STAR;
+				aStar();
+			}
+		}
+	}
+	else if (tankSide == 2)
+	{
+		if(tempCoor.x > 625 && tempCoor.x < 2125)
+		{
+			if(tempCoor.z > -2125 && tempCoor.z < 2125)
+			{
+				currentState = A_STAR;
+				aStar();
+			}
+		}
+	}
+	*/
 }
 
 Ogre::String Tank::getState()
@@ -284,8 +330,9 @@ void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpa
 
 				mTankBodyNode->setPosition(position);
 			}
+			mTankBodyNode->setVisible(true);
+			setSelected(false);
 		}
-		return;
 	}
 
 	//Check for tank powerups
@@ -303,7 +350,6 @@ void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpa
 			Ogre::Vector3 powerUpLocation = mPowerUpSpawns[i]->spawnNode->getPosition();
 			if(tankCenter.squaredDistance(powerUpLocation) < 5625) //squaredDistance is better
 			{
-				std::cout << 111 << std::endl;
 				found = true;
 				location = i;
 			}
@@ -359,11 +405,6 @@ void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpa
 			}
 		}
 	}
-
-
-
-
-
 
 /*
 		tankSphere.setCenter(tankCenter);
@@ -468,8 +509,39 @@ void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpa
 		break;
 
 		case POSSESSED: {
-			mTankBodyNode->translate(mMove * deltaTime * mMoveSpd, 0, 0, Ogre::Node::TransformSpace::TS_LOCAL);
+
+			//THIS IS WHERE THE TANK IS MOVED WHEN PROCESSING
+
+			//WE MOVED
+			Ogre::Vector3 RayDirection = mTankBodyNode->getPosition();
+			Ogre::SceneNode * RayDir = mTankBodyNode->createChildSceneNode(RayDirection);
+
+			RayDir->translate(1, 0, 0, Ogre::Node::TransformSpace::TS_LOCAL);
+			RayDirection = RayDir->getPosition();
+
+			Ogre::Ray shootToCheckWall = Ogre::Ray(mTankBodyNode->getPosition(), RayDirection);
+
+			Ogre::RaySceneQuery* mRaySceneQuery = mSceneMgr->createRayQuery(shootToCheckWall, Ogre::SceneManager::ENTITY_TYPE_MASK);
+			mRaySceneQuery->setSortByDistance(true);
+			// Ray-cast and get first hit
+			Ogre::RaySceneQueryResult &result = mRaySceneQuery->execute();
+			Ogre::RaySceneQueryResult::iterator itr = result.begin();
+			Ogre::String name = itr->movable->getName();
+			while((name == tankBody->getName() || name == tankTurret->getName() || name == tankBarrel->getName()) && itr != result.end() )
+			{
+				itr++;
+				name = itr->movable->getName();
+			}
+			if(itr != result.end() && ((*itr).distance > 0.01 || mMove > 0))
+			{
+				
+				mTankBodyNode->translate(mMove * deltaTime * mMoveSpd, 0, 0, Ogre::Node::TransformSpace::TS_LOCAL);
+			}
+					
+
 			mTankBodyNode->yaw(Ogre::Degree(bodyRotate * deltaTime * mRotSpd));
+			//mTankBodyNode->translate(mMove * deltaTime * mMoveSpd, 0, 0, Ogre::Node::TransformSpace::TS_LOCAL);
+			//mTankBodyNode->yaw(Ogre::Degree(bodyRotate * deltaTime * mRotSpd));
 
 			// Rotate the tank turret
 			mTankTurretNode->yaw(Ogre::Degree(turretRotation * deltaTime * mRotSpd * 1.5));
@@ -597,6 +669,8 @@ void Tank::aStar()
 {
 	Ogre::Vector3 tankLocation = mTankBodyNode->getPosition();
 	startNode = pathFindingGraph->getNode(tankLocation);
+	
+	findShortestExit();
 
 	// check that goal node is not the same as start node
 	if(goalNode != startNode)
@@ -610,7 +684,51 @@ void Tank::aStar()
 		}
 	}
 }
+void Tank::findShortestExit()
+{
+	//used to check shortest distance
+	float distance = 0.0f;
+	if(tankSide == 1)
+	{
+		for (std::vector<int>::iterator it = exitNodesA.begin(); it != exitNodesA.end(); it++)
+		{
+			Ogre::Vector3 pos = pathFindingGraph->getPosition((*it));
 
+			float curDistance = (mTankBodyNode->getPosition()).squaredDistance(pos);
+
+			if (distance == 0.f) //distance has not been set
+			{
+				distance = curDistance;
+				goalNode = (*it);
+			}
+			else if (curDistance < distance)
+			{
+				distance = curDistance;
+				goalNode = (*it);
+			}
+		}
+	}
+	else if (tankSide == 2)
+	{
+		for (std::vector<int>::iterator it = exitNodesB.begin(); it != exitNodesB.end(); it++)
+		{
+			Ogre::Vector3 pos = pathFindingGraph->getPosition((*it));
+			
+			float curDistance = (mTankBodyNode->getPosition()).squaredDistance(pos);
+
+			if (distance == 0.f) //distance has not been set
+			{
+				distance = curDistance;
+				goalNode = (*it);
+			}
+			else if (curDistance < distance)
+			{
+				distance = curDistance;
+				goalNode = (*it);
+			}
+		}
+	}
+}
 //WEE ADDED END
 
 //michael wander code
@@ -706,18 +824,6 @@ void TankManager::init(Ogre::SceneManager* scnMgr, ProjectileManager* projectile
 	projMgr = projectileMgr;
 
 	this->soundPlayer = soundPlayer;
-
-	exitNodesA.push_back(121);
-	exitNodesA.push_back(337);
-	exitNodesA.push_back(517);
-	exitNodesA.push_back(769);
-	exitNodesA.push_back(1201);
-
-	exitNodesB.push_back(94);
-	exitNodesB.push_back(418);
-	exitNodesB.push_back(598);
-	exitNodesB.push_back(922);
-	exitNodesB.push_back(1246);
 }
 
 Tank* TankManager::createTank(const Ogre::Vector3& position, int side, Graph* pathFindingGraph, PathFinding mPathFinder){
@@ -748,87 +854,18 @@ Tank* TankManager::createTank(const Ogre::Vector3& position, int side, Graph* pa
 	// Move it above the ground
 	mTankBodyNode->translate(position.x, position.y + 13.f, position.z);
 
-	int goalNode = -1;
-	float distance = 0.f;
-
 	if(side == 1){
 		tankBody->setMaterialName("lp_tank_materialred");
 		tankTurret->setMaterialName("lp_tank_materialred");
 		tankBarrel->setMaterialName("lp_tank_materialred");
 
 		mTankBodyNode->yaw(Ogre::Degree(180.f));
-		
-		for (std::vector<int>::iterator it = exitNodesA.begin(); it != exitNodesA.end(); it++)
-		{
-			Ogre::Vector3 pos = pathFindingGraph->getPosition((*it));
-
-			float curDistance = position.squaredDistance(pos);
-
-			if (distance == 0.f) //distance has not been set
-			{
-				distance = curDistance;
-				goalNode = (*it);
-			}
-			else if (curDistance < distance)
-			{
-				distance = curDistance;
-				goalNode = (*it);
-			}
-		}
-		
-		/*
-		Ogre::Real shortestDistance = 999999999999999;
-		for(int i = 0; i < exitNodesA.size(); i++)
-		{
-			Ogre::Vector3 temp = pathFindingGraph->getPosition(exitNodesA[i]);
-			Ogre::Real temp2 = temp.distance(mTankBodyNode->getPosition());
-			float temp3 = temp2;
-			printf("%f", temp3);
-			if(shortestDistance > temp2)
-			{
-				shortestDistance = temp2;
-				goalNode = exitNodesA[i];
-			}
-		}
-		*/
 	}
 	else if(side == 2)
 	{
 		tankBody->setMaterialName("lp_tank_materialblue");
 		tankTurret->setMaterialName("lp_tank_materialblue");
 		tankBarrel->setMaterialName("lp_tank_materialblue");
-		
-		for (std::vector<int>::iterator it = exitNodesB.begin(); it != exitNodesB.end(); it++)
-		{
-			Ogre::Vector3 pos = pathFindingGraph->getPosition((*it));
-			
-			float curDistance = position.squaredDistance(pos);
-
-			if (distance == 0.f) //distance has not been set
-			{
-				distance = curDistance;
-				goalNode = (*it);
-			}
-			else if (curDistance < distance)
-			{
-				distance = curDistance;
-				goalNode = (*it);
-			}
-		}
-		/*
-		Ogre::Real shortestDistance = 999999999999999;
-		for(int i = 0; i < exitNodesB.size(); i++)
-		{
-			Ogre::Vector3 temp = pathFindingGraph->getPosition(exitNodesB[i]);
-			Ogre::Real temp2 = temp.distance(mTankBodyNode->getPosition());
-			float temp3 = temp2;
-			printf("%f", temp3);
-			if(shortestDistance > temp2)
-			{
-				shortestDistance = temp2;
-				goalNode = exitNodesB[i];
-			}
-		}*/
 	}
 
 	// Create a child scene node from tank body's scene node and attach the tank turret to it
@@ -851,7 +888,7 @@ Tank* TankManager::createTank(const Ogre::Vector3& position, int side, Graph* pa
 		mSceneMgr->getRootSceneNode()->createChildSceneNode()->attachObject(aStarPath);
 
 	Tank* newTank = new Tank(mSceneMgr->createBillboardSet(), mSceneMgr->createBillboardSet(),
-		mTankBodyNode, mTankTurretNode, mTankBarrelNode, this, pathFindingGraph, mPathFinder, aStarPath, side, goalNode, mSceneMgr);
+		mTankBodyNode, mTankTurretNode, mTankBarrelNode, this, pathFindingGraph, mPathFinder, aStarPath, side, mSceneMgr, tankBody, tankTurret, tankBarrel);
 
 	newTank->resetAll();
 	
@@ -867,7 +904,7 @@ Tank* TankManager::createTank(const Ogre::Vector3& position, int side, Graph* pa
 
 void TankManager::createProjectile(const Ogre::Vector3& tankPosition, const Ogre::Quaternion& turretOrientation,
 					  const Ogre::Degree& angle, const float& velocity, const float& dmg){
-	soundPlayer->playFireSound(tankPosition);
+	soundPlayer->playFireSound();
 	projMgr->createProjectile(tankPosition, turretOrientation, angle, velocity, dmg);
 }
 
