@@ -167,6 +167,12 @@ private:
 		Ogre::Vector3 previousLocation;
 		void checkWhereAt();
 
+		Ogre::Quaternion initBodyOrientation;
+		Ogre::Quaternion initBarrelOrientation;
+		Ogre::Quaternion initTurretOrientation;
+		bool orientationEquals( Ogre::Quaternion a, Ogre::Quaternion b);
+		float checkOrientation;
+
 		//wee added end
 	bool selected;
 	void rotateTank(void);

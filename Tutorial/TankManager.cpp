@@ -76,6 +76,18 @@ Tank::Tank(Ogre::BillboardSet* healthBar, Ogre::BillboardSet* selectionCircle,
 	exitNodesB.push_back(598);
 	exitNodesB.push_back(922);
 	exitNodesB.push_back(1246);
+
+	initBodyOrientation = mTankBodyNode->getOrientation();
+	initBarrelOrientation = mTankBarrelNode->getOrientation();
+	initTurretOrientation = mTankTurretNode->getOrientation();
+	checkOrientation = 0;
+}
+
+bool Tank::orientationEquals( Ogre::Quaternion a, Ogre::Quaternion b )
+{
+	Ogre::Real tolerance = 1e-3;
+    Ogre::Real d = a.Dot(b); // why isn't it called .dotProduct()?
+    return 1 - d*d < tolerance;
 }
 
 void Tank::resetAll(void){
@@ -134,7 +146,19 @@ void Tank::resetAll(void){
 
 	resetWander();
 
-	
+	if(!orientationEquals(initBodyOrientation, mTankBodyNode->getOrientation()))
+	{
+		mTankBodyNode->setOrientation(initBodyOrientation);
+	}
+	if(!orientationEquals(initBarrelOrientation, mTankBarrelNode->getOrientation()))
+	{
+		mTankBarrelNode->setOrientation(initBarrelOrientation);
+	}
+	if(!orientationEquals(initTurretOrientation, mTankTurretNode->getOrientation()))
+	{
+		mTankTurretNode->setOrientation(initTurretOrientation);
+	}
+
 }
 
 void Tank::resetWander()
@@ -541,7 +565,28 @@ void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpa
 		checkPosition = 0;
 		previousLocation = mTankBodyNode->getPosition();
 	}
-
+	
+	checkOrientation += deltaTime;
+	if(checkOrientation > 15)
+	{
+		if(currentState != A_STAR)
+		{
+			if(!orientationEquals(initBodyOrientation, mTankBodyNode->getOrientation()))
+			{
+				mTankBodyNode->setOrientation(initBodyOrientation);
+			}
+			if(!orientationEquals(initBarrelOrientation, mTankBarrelNode->getOrientation()))
+			{
+				mTankBarrelNode->setOrientation(initBarrelOrientation);
+			}
+			if(!orientationEquals(initTurretOrientation, mTankTurretNode->getOrientation()))
+			{
+				mTankTurretNode->setOrientation(initTurretOrientation);
+			}
+		}
+		checkOrientation = 0;
+	}
+	
 
 	//no movement for body yet
 
@@ -563,7 +608,7 @@ void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpa
 		case FIRE:
 		{
 			Ogre::Degree angle = getShootingAngle(target->getPosition());
-			mTankTurretNode->lookAt(target->getPosition(), Ogre::Node::TransformSpace::TS_LOCAL, Ogre::Vector3::NEGATIVE_UNIT_X);
+			mTankTurretNode->lookAt(target->getPosition(), Ogre::Node::TransformSpace::TS_WORLD, Ogre::Vector3::NEGATIVE_UNIT_X);
 			//barrelDegree = angle;
 			if (weaponTimer > 4)
 			{
