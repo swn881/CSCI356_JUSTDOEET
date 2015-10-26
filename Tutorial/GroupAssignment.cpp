@@ -352,19 +352,44 @@ bool GroupAssignment::keyPressed( const OIS::KeyEvent &arg )
 		break;
 		case OIS::KC_K:
 		
-		if (!inTankMode && selectedTank != NULL)
-		{
-			selectedTank->attachCamera(mCamera);
-			inTankMode = true;
-			mTrayMgr->hideCursor();
-			selectedTank->setPossessed(true);
+			if (!inTankMode && selectedTank != NULL)
+			{
+				selectedTank->attachCamera(mCamera);
+				inTankMode = true;
+				mTrayMgr->hideCursor();
+				selectedTank->setPossessed(true);
 
-			soundPlayer->playMovingTank();
-		}
+				soundPlayer->playMovingTank();
+			}
+			if(inTankMode)
+			{
+				selectedTank->detachCamera(mCamera);
+				mCamera->setPosition(Ogre::Vector3(0, 900, 1000));
+				mCamera->lookAt(Ogre::Vector3(0, 0, 10));
+				selectedTank->setSelected(false);
+				inTankMode = false;
+				mTrayMgr->showCursor();
+				selectedTank->setPossessed(false);
+				mTextGUI->hide();
+				mBulletAnimation->hide();
+				mHealthBar->hide();
+
+				soundPlayer->stopSounds();
+
+				//selectedTank = NULL;
+			}
 		break;
 		case OIS::KC_P:
 			mWindow->writeContentsToTimestampedFile("GroupProject", ".png");
 			break;
+
+		case OIS::KC_F:
+			if (mWindow->isFullScreen())
+				mWindow->setFullscreen(false, 1024, 768);
+			else
+				mWindow->setFullscreen(true, 1024, 768);
+		break;
+
 		case OIS::KC_V:
 			controlWeather();
 		break;		
@@ -400,25 +425,7 @@ bool GroupAssignment::keyPressed( const OIS::KeyEvent &arg )
 		case OIS::KC_2:
 			createTanks(2);
 		break;
-		case OIS::KC_0:
-			if(inTankMode)
-			{
-				selectedTank->detachCamera(mCamera);
-				mCamera->setPosition(Ogre::Vector3(0, 900, 1000));
-				mCamera->lookAt(Ogre::Vector3(0, 0, 10));
-				selectedTank->setSelected(false);
-				inTankMode = false;
-				mTrayMgr->showCursor();
-				selectedTank->setPossessed(false);
-				mTextGUI->hide();
-				mBulletAnimation->hide();
-				mHealthBar->hide();
 
-				soundPlayer->stopSounds();
-
-				//selectedTank = NULL;
-			}
-		break;
 		case OIS::KC_9: //show bounding box
 			for(int i = 0; i < boundingBoxes.size(); i++)
 			{
