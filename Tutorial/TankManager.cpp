@@ -550,9 +550,13 @@ void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpa
 	{
 		if(mPowerUpSpawns[powerUpNo]->getIsPowerUp())
 		{
-			currentState = SEEK;
-			seekTarget = mPowerUpSpawns[powerUpNo]->getPowerLocation();
-			seekAStar();
+			if(currentState != SEEK)
+			{
+				currentState = SEEK;
+				seekTarget = mPowerUpSpawns[powerUpNo]->getPowerLocation();
+				seekAStar();
+			}
+			
 		}
 		else 
 			currentState = WANDER;
