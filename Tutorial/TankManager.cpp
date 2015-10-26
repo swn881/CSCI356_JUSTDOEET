@@ -181,38 +181,56 @@ void Tank::setPossessed(bool possessed){
 	if(possessed){
 		savedState = currentState;
 		currentState = POSSESSED;
-	} else{
-		currentState = savedState;
-	}
-	/*
-	//check coordinates
-	Ogre::Vector3 tempCoor = mTankBodyNode->getPosition();
+	} 
+	else
+	{
+		//check coordinates
+		Ogre::Vector3 tempCoor = mTankBodyNode->getPosition();
 
-	if(tankSide == 1)
-	{
-		//we check if we want to do aStar or not 
-		if(tempCoor.x > -2125 && tempCoor.x < -625)
+		if(tankSide == 1)
 		{
-			if(tempCoor.z > -2125 && tempCoor.z < 2125)
+			//we check if we want to do aStar or not 
+			if(tempCoor.x > -2125 && tempCoor.x < -625)
 			{
-				//means we are near the spawn point of side A
-				currentState = A_STAR;
-				aStar();
+				if(tempCoor.z > -2125 && tempCoor.z < 2125)
+				{
+					//means we are near the spawn point of side A
+					currentState = A_STAR;
+					aStar(tankSide);
+				}
+			}
+			else if(tempCoor.x > 625 && tempCoor.x < 2125)
+			{
+				if(tempCoor.z > -2125 && tempCoor.z < 2125)
+				{
+					currentState = A_STAR;
+					aStar(2);
+				}
+			}
+		}
+		else if (tankSide == 2)
+		{
+			if(tempCoor.x > 625 && tempCoor.x < 2125)
+			{
+				if(tempCoor.z > -2125 && tempCoor.z < 2125)
+				{
+					currentState = A_STAR;
+					aStar(tankSide);
+				}
+			}
+			else if(tempCoor.x > 625 && tempCoor.x < 2125)
+			{
+				if(tempCoor.z > -2125 && tempCoor.z < 2125)
+				{
+					currentState = A_STAR;
+					aStar(1);
+				}
 			}
 		}
 	}
-	else if (tankSide == 2)
-	{
-		if(tempCoor.x > 625 && tempCoor.x < 2125)
-		{
-			if(tempCoor.z > -2125 && tempCoor.z < 2125)
-			{
-				currentState = A_STAR;
-				aStar();
-			}
-		}
-	}
-	*/
+	
+	
+	
 }
 
 Ogre::String Tank::getState()
@@ -488,7 +506,7 @@ void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpa
 			if(tankStarted == false)
 			{
 				tankStarted = true;
-				aStar(); //creates the path to get out of there
+				aStar(tankSide); //creates the path to get out of there
 			}
 			else
 			{
@@ -630,7 +648,6 @@ bool Tank::nextLocation()
 
 	return true;
 }
-
 void Tank::createPath(Ogre::ManualObject* line, float height, std::vector<int>& path, Ogre::ColourValue& colour)
 {
 	pathCreated = true;
@@ -664,13 +681,12 @@ void Tank::createPath(Ogre::ManualObject* line, float height, std::vector<int>& 
 	// Finished defining line
 	line->end();
 }
-
-void Tank::aStar()
+void Tank::aStar(int side)
 {
 	Ogre::Vector3 tankLocation = mTankBodyNode->getPosition();
 	startNode = pathFindingGraph->getNode(tankLocation);
 	
-	findShortestExit();
+	findShortestExit(side);
 
 	// check that goal node is not the same as start node
 	if(goalNode != startNode)
@@ -684,11 +700,11 @@ void Tank::aStar()
 		}
 	}
 }
-void Tank::findShortestExit()
+void Tank::findShortestExit(int side) //you can manipulate which side of the exit 
 {
 	//used to check shortest distance
 	float distance = 0.0f;
-	if(tankSide == 1)
+	if(side == 1)
 	{
 		for (std::vector<int>::iterator it = exitNodesA.begin(); it != exitNodesA.end(); it++)
 		{
@@ -708,7 +724,7 @@ void Tank::findShortestExit()
 			}
 		}
 	}
-	else if (tankSide == 2)
+	else if (side == 2)
 	{
 		for (std::vector<int>::iterator it = exitNodesB.begin(); it != exitNodesB.end(); it++)
 		{

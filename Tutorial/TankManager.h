@@ -114,7 +114,7 @@ private:
 
 		enum TankBodyStates
 		{
-			A_STAR, SEEK, WANDER, ESCAPE, STOP, POSSESSED
+			A_STAR, SEEK, WANDER, ESCAPE, STOP, POSSESSED, GET_OUT
 		};
 
 		TankBodyStates currentState;
@@ -126,10 +126,10 @@ private:
 
 		//wee added here FUNCTIONS 
 		void createPath(Ogre::ManualObject* line, float height, std::vector<int>& path, Ogre::ColourValue& colour);
-		void aStar();
+		void aStar(int);
 		bool nextLocation();
 		void aStarMovement(const float&);
-		void findShortestExit(); //give me the shortest exits based on the side you are currenty in
+		void findShortestExit(int); //give me the shortest exits based on the side you are currenty in
 
 		//wee added end
 	bool selected;
