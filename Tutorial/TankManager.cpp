@@ -461,9 +461,6 @@ void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpa
 				aStarMovement(deltaTime);
 			}
 		break;
-		case WANDER:
-			wander(deltaTime);
-			break;
 		case FIRE:
 		{
 			Ogre::Degree angle = getShootingAngle(target->getPosition());
@@ -477,7 +474,11 @@ void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpa
 			if (target->hp <= 0 || mTankBodyNode->getPosition().distance(target->getPosition()) > 600 )
 				currentState = WANDER;
 		}
-		break;
+		
+		case WANDER:
+			wander(deltaTime);
+			break;
+	
 		case SEEK:
 			
 		break;
