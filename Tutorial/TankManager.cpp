@@ -76,7 +76,6 @@ Tank::Tank(Ogre::BillboardSet* healthBar, Ogre::BillboardSet* selectionCircle,
 	exitNodesB.push_back(598);
 	exitNodesB.push_back(922);
 	exitNodesB.push_back(1246);
-
 }
 
 void Tank::resetAll(void){
@@ -117,6 +116,36 @@ void Tank::resetAll(void){
 
 	setSelected(false);
 	resetAttributes();
+
+
+
+
+	checkPosition = 0;
+	previousLocation = mTankBodyNode->getPosition();
+	
+	seekStartNode = 0;
+	seekGoalNode = 0;
+	seekPathCreated = false;
+	seekTarget = Ogre::Vector3::ZERO ;
+	mSeekList.clear();
+	mSeekDestination = Ogre::Vector3::ZERO ;
+	mSeekDirection = Ogre::Vector3::ZERO ;
+	mSeekDistance = 0;
+
+	resetWander();
+
+	
+}
+
+void Tank::resetWander()
+{
+	wanderStartNode = 0;
+	wanderGoalNode = 0;
+	wanderPathCreated = false;
+	mWanderList.clear();
+	mWanderDestination = Ogre::Vector3::ZERO ;
+	mWanderDirection = Ogre::Vector3::ZERO ;
+	mWanderDistance = 0;
 }
 
 void Tank::resetAttributes(void){
@@ -194,9 +223,16 @@ void Tank::setPossessed(bool possessed){
 	} 
 	else
 	{
-		//check coordinates
-		Ogre::Vector3 tempCoor = mTankBodyNode->getPosition();
+		
 
+		checkWhereAt();
+	}
+}
+
+void Tank::checkWhereAt()
+{
+	//check coordinates
+		Ogre::Vector3 tempCoor = mTankBodyNode->getPosition();
 		if(tankSide == 1)
 		{
 			//we check if we want to do aStar or not 
@@ -220,6 +256,8 @@ void Tank::setPossessed(bool possessed){
 			else
 			{
 				currentState = WANDER;
+				resetWander();
+				wanderAStar();
 			}
 		}
 		else if (tankSide == 2)
@@ -244,12 +282,11 @@ void Tank::setPossessed(bool possessed){
 			else
 			{
 				currentState = WANDER;
+				resetWander();
+				wanderAStar();
 			}
+
 		}
-	}
-	
-	
-	
 }
 
 Ogre::String Tank::getState()
@@ -400,7 +437,7 @@ void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpa
 			if(mPowerUpSpawns[location]->getIsPowerUp())
 			{
 				char tempType = mPowerUpSpawns[location]->pickupPowerUp(mSceneMgr);
-				
+
 				printf("Got Powerup %c\n", tempType);
 
 				switch(tempType)
@@ -444,6 +481,9 @@ void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpa
 					break;
 				}
 			}
+			currentState = WANDER;
+			resetWander();
+			wanderAStar();
 		}
 	}
 
@@ -453,7 +493,7 @@ void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpa
 	weaponTimer += deltaTime;
 
 	//seek powerups
-	Ogre::Real distancePowerUp;
+	Ogre::Real distancePowerUp = 0;
 	int powerUpNo = 0;
 	bool firstTimeDistanceCheck = true;
 	for(int i = 0; i < mPowerUpSpawns.size(); i++)
@@ -474,8 +514,34 @@ void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpa
 			}
 		}
 	}
-	if(distancePowerUp < 100 && distancePowerUp > 0)
-		currentState = SEEK;
+	if(distancePowerUp < 500 && distancePowerUp > 0)
+	{
+		if(mPowerUpSpawns[powerUpNo]->getIsPowerUp())
+		{
+			currentState = SEEK;
+			seekTarget = mPowerUpSpawns[powerUpNo]->getPowerLocation();
+			seekAStar();
+		}
+		else 
+			currentState = WANDER;
+		
+	}
+	
+	//check if the user is like somewhere and stopped ocassionally 
+	checkPosition += deltaTime;
+	if(checkPosition > 3)
+	{
+		if(mTankBodyNode->getPosition().x == previousLocation.x)
+		{
+			if(mTankBodyNode->getPosition().z == previousLocation.z)
+			{
+				checkWhereAt();
+			}
+		}
+		checkPosition = 0;
+		previousLocation = mTankBodyNode->getPosition();
+	}
+
 
 	//no movement for body yet
 
@@ -497,7 +563,7 @@ void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpa
 		case FIRE:
 		{
 			Ogre::Degree angle = getShootingAngle(target->getPosition());
-			mTankTurretNode->lookAt(target->getPosition(), Ogre::Node::TransformSpace::TS_WORLD, Ogre::Vector3::NEGATIVE_UNIT_X);
+			mTankTurretNode->lookAt(target->getPosition(), Ogre::Node::TransformSpace::TS_LOCAL, Ogre::Vector3::NEGATIVE_UNIT_X);
 			//barrelDegree = angle;
 			if (weaponTimer > 4)
 			{
@@ -509,11 +575,15 @@ void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpa
 		}
 		
 		case WANDER:
-			wander(deltaTime);
+			//wander(deltaTime);
+			wanderMovement(deltaTime);
 			break;
 	
 		case SEEK:
-			seek(mPowerUpSpawns[powerUpNo]->getPowerLocation(), deltaTime);
+			//seek(mPowerUpSpawns[powerUpNo]->getPowerLocation(), deltaTime);
+
+			//seek(Ogre::Vector3::ZERO, deltaTime);
+			seekMovement(deltaTime);
 		break;
 		case ESCAPE:
 			
@@ -643,6 +713,8 @@ bool Tank::nextLocation()
 	{
 		aStarPath->clear();
 		currentState = WANDER;
+		resetWander();
+		wanderAStar();
 		return false;
 	}
 		
@@ -751,6 +823,228 @@ void Tank::findShortestExit(int side) //you can manipulate which side of the exi
 		}
 	}
 }
+
+void Tank::seekAStar() //remember when set seek target make it 13.0f
+{
+	Ogre::Vector3 tankLocation = mTankBodyNode->getPosition();
+	seekStartNode = pathFindingGraph->getNode(tankLocation);
+	
+	seekGoalNode = pathFindingGraph->getNode(seekTarget);
+
+	// check that goal node is not the same as start node
+	if(seekGoalNode != seekStartNode)
+	{
+		// try to find path from start to goal node
+		std::vector<int> path;
+			
+		if(mPathFinder.AStar(seekStartNode, seekGoalNode, *pathFindingGraph, path))
+		{
+			createSeekPath(13.0f, path);	
+		}
+	}
+}
+void Tank::createSeekPath(float height, std::vector<int>& path)
+{
+	seekPathCreated = true;
+
+	// Specify the vertices and vertex colour for the line
+	Ogre::Vector3 position;
+
+	for(std::vector<int>::iterator it=path.begin(); it!=path.end(); it++)
+	{
+		position = pathFindingGraph->getPosition(*it);
+		
+		if(mSeekList.empty())
+		{
+			Ogre::Vector3 temp = mTankBodyNode->getPosition();
+			mSeekList.push_back(Ogre::Vector3(temp.x, 13.0f, temp.z));
+		}
+		else
+		{
+			mSeekList.push_back(Ogre::Vector3(position.x, 13.0f, position.z));
+		}
+	}
+	mSeekList.pop_back();
+	mSeekList.push_back(seekTarget);
+}
+bool Tank::seekNextLocation()
+{
+	if(mSeekList.empty())
+	{
+		currentState = WANDER;
+		return false;
+	}
+		
+	mSeekDestination = mSeekList.front();
+	mSeekList.pop_front();
+	mSeekDirection = mSeekDestination - mTankBodyNode->getPosition();
+
+	mSeekDistance = mSeekDirection.normalise();
+
+	return true;
+}
+void Tank::seekMovement(const float & deltaTime)
+{
+	if(seekPathCreated)
+	{
+		if (mSeekDirection == Ogre::Vector3::ZERO) 
+		{
+			seekNextLocation();
+		}
+		else
+		{
+
+			Ogre::Real move = mMoveSpd * (deltaTime);
+			mSeekDistance -= move;
+			Ogre::Vector3 src = mTankBodyNode->getOrientation() * Ogre::Vector3::NEGATIVE_UNIT_X;
+	
+			//http://www.ogre3d.org/tikiwiki/tiki-index.php?page=Quaternion+and+Rotation+Primer
+			//this is used for rotation of the tank
+			if ((1.0 + src.dotProduct(mSeekDirection)) < 0.0001) 
+			{
+				mTankBodyNode->yaw(Ogre::Degree(180));
+			}
+			else
+			{
+				mSeekDirection.y = 0;
+				Ogre::Quaternion quat = src.getRotationTo(mSeekDirection);
+				
+				Ogre::Quaternion mOrientSrc = mTankBodyNode->getOrientation();
+				Ogre::Quaternion mOrientDest = quat * mOrientSrc;
+				Ogre::Quaternion delta = Ogre::Quaternion::nlerp(deltaTime * 2.0, mOrientSrc, mOrientDest, true);
+				mTankBodyNode->setOrientation(delta);
+			}      
+			//for movement
+			if (mSeekDistance <= 0)
+			{
+				mTankBodyNode->setPosition(mSeekDestination);
+				mSeekDirection = Ogre::Vector3::ZERO;
+			}
+			else
+			{
+				mTankBodyNode->translate(move * mSeekDirection);
+			}
+		}
+	}
+}
+
+void Tank::wanderAStar() //remember when set seek target make it 13.0f
+{
+	Ogre::Vector3 tankLocation = mTankBodyNode->getPosition();
+	wanderStartNode = pathFindingGraph->getNode(tankLocation);
+	
+	createRandomWander();
+
+	// check that goal node is not the same as start node
+	if(wanderGoalNode != wanderStartNode)
+	{
+		// try to find path from start to goal node
+		std::vector<int> path;
+			
+		if(mPathFinder.AStar(wanderStartNode, wanderGoalNode, *pathFindingGraph, path))
+		{
+			createWanderPath(13.0f, path);	
+		}
+	}
+}
+void Tank::createWanderPath(float height, std::vector<int>& path)
+{
+	wanderPathCreated = true;
+
+	// Specify the vertices and vertex colour for the line
+	Ogre::Vector3 position;
+
+	for(std::vector<int>::iterator it=path.begin(); it!=path.end(); it++)
+	{
+		position = pathFindingGraph->getPosition(*it);
+		
+		if(mWanderList.empty())
+		{
+			Ogre::Vector3 temp = mTankBodyNode->getPosition();
+			mWanderList.push_back(Ogre::Vector3(temp.x, 13.0f, temp.z));
+		}
+		else
+		{
+			mWanderList.push_back(Ogre::Vector3(position.x, 13.0f, position.z));
+		}
+	}
+}
+bool Tank::wanderNextLocation()
+{
+	if(mWanderList.empty())
+	{
+		currentState = WANDER;
+		resetWander();
+		wanderAStar();
+		return false;
+	}
+		
+	mWanderDestination = mWanderList.front();
+	mWanderList.pop_front();
+	mWanderDirection = mWanderDestination - mTankBodyNode->getPosition();
+
+	mWanderDistance = mWanderDirection.normalise();
+
+	return true;
+}
+void Tank::wanderMovement(const float & deltaTime)
+{
+	if(wanderPathCreated)
+	{
+		if (mWanderDirection == Ogre::Vector3::ZERO) 
+		{
+			wanderNextLocation();
+		}
+		else
+		{
+
+			Ogre::Real move = mMoveSpd * (deltaTime);
+			mWanderDistance -= move;
+			Ogre::Vector3 src = mTankBodyNode->getOrientation() * Ogre::Vector3::NEGATIVE_UNIT_X;
+	
+			//http://www.ogre3d.org/tikiwiki/tiki-index.php?page=Quaternion+and+Rotation+Primer
+			//this is used for rotation of the tank
+			if ((1.0 + src.dotProduct(mWanderDirection)) < 0.0001) 
+			{
+				mTankBodyNode->yaw(Ogre::Degree(180));
+			}
+			else
+			{
+				mWanderDirection.y = 0;
+				Ogre::Quaternion quat = src.getRotationTo(mWanderDirection);
+				
+				Ogre::Quaternion mOrientSrc = mTankBodyNode->getOrientation();
+				Ogre::Quaternion mOrientDest = quat * mOrientSrc;
+				Ogre::Quaternion delta = Ogre::Quaternion::nlerp(deltaTime * 2.0, mOrientSrc, mOrientDest, true);
+				mTankBodyNode->setOrientation(delta);
+			}      
+			//for movement
+			if (mWanderDistance <= 0)
+			{
+				mTankBodyNode->setPosition(mWanderDestination);
+				mWanderDirection = Ogre::Vector3::ZERO;
+			}
+			else
+			{
+				mTankBodyNode->translate(move * mWanderDirection);
+			}
+		}
+	}
+	
+}
+void Tank::createRandomWander()
+{
+	std::random_device rd;
+	std::mt19937 random(rd());
+	//generate within 13 - 22
+	std::uniform_real_distribution<double> randomGen1(12, 23);
+	int tempNumber = randomGen1(random);
+	std::uniform_real_distribution<double> randomGen2(1, 36);
+	int tempNumber2 = (36 * (int)randomGen2(random)) + (int)tempNumber;
+
+	wanderGoalNode = tempNumber2;
+}
+
 //WEE ADDED END
 
 //michael wander code
