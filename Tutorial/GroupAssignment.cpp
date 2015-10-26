@@ -661,6 +661,8 @@ void GroupAssignment::createPath(Ogre::ManualObject* line, float height, std::ve
 	line->end();
 }
 
+
+
 void GroupAssignment::createTanks(int side)
 {
 	std::random_device rd;

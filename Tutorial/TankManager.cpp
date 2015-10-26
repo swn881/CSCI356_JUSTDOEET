@@ -179,6 +179,14 @@ void Tank::detachCamera(Ogre::Camera* camera){
 	thirdPersonCamNode->detachObject(camera);
 }
 
+void Tank::setFire(bool firing)
+{
+	if (firing)
+		currentState = FIRE;
+	else
+		currentState = WANDER;
+}
+
 void Tank::setPossessed(bool possessed){
 	if(possessed){
 		savedState = currentState;
@@ -260,6 +268,10 @@ Ogre::String Tank::getState()
 	else if (currentState == STOP)
 	{
 		return "Stopped";
+	}
+	else if (currentState == FIRE)
+	{
+		return "Firing";
 	}
 }
 
@@ -451,6 +463,21 @@ void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpa
 		break;
 		case WANDER:
 			wander(deltaTime);
+			break;
+		case FIRE:
+		{
+			Ogre::Degree angle = getShootingAngle(target->getPosition());
+			//Ogre::Quaternion direction = mTankTurretNode->getPosition()->getRotationTo(target->getPosition());
+			mTankTurretNode->lookAt(target->getPosition(), Ogre::Node::TransformSpace::TS_WORLD, Ogre::Vector3::NEGATIVE_UNIT_Z);
+			//barrelDegree = angle;
+			if (weaponTimer > 4)
+			{
+				tnkMgr->createProjectile(mTankBodyNode->getPosition(), mTankTurretNode->_getDerivedOrientation(), angle, shootingVelocity, dmg);
+				weaponTimer = 0;
+			}
+			if (target->hp <= 0)
+				currentState = WANDER;
+		}
 		break;
 		case SEEK:
 			
@@ -729,6 +756,7 @@ void Tank::wander(const float& deltaTime){
 	mTankBodyNode->lookAt(displacement, Ogre::Node::TransformSpace::TS_WORLD);
 
 	mTankBodyNode->translate(steering * deltaTime);
+
 }
 
 //code taken and adapted from http://natureofcode.com/book/chapter-6-autonomous-agents/
@@ -1022,6 +1050,8 @@ void TankManager::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPow
 		(*it)->update(deltaTime, mPowerUpSpawns);
 	}
 
+	controlStates();
+
 }
 
 std::vector<Ogre::Vector3> TankManager::getPositionTank(int side)
@@ -1044,4 +1074,29 @@ std::vector<Ogre::Vector3> TankManager::getPositionTank(int side)
 		}
 	}
 	return tankPos;
+}
+
+
+void TankManager::controlStates()
+{
+	for (std::set<Tank*>::iterator itA = tankSideA.begin(); itA != tankSideA.end(); itA++)
+	{
+		for (std::set<Tank*>::iterator itB = tankSideB.begin(); itB != tankSideB.end(); itB++)
+		{
+			if ((*itA)->getPosition().distance((*itB)->getPosition()) < 600)
+			{
+				if (!(*itA)->isSelected())
+				{
+					(*itA)->setFire(true);
+					(*itA)->target = (*itB);
+				}
+				if (!(*itB)->isSelected())
+				{
+					(*itB)->setFire(true);
+					(*itB)->target = (*itA);
+				}
+			}
+		}
+
+	}
 }

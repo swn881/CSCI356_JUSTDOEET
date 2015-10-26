@@ -32,6 +32,8 @@ public:
 	void attachCamera(Ogre::Camera* camera);
 	void detachCamera(Ogre::Camera* camera);
 	void setPossessed(bool possessed);
+	void setFire(bool firing);
+
 	Ogre::String getState();
 
 	Ogre::Degree getShootingAngle(const Ogre::Vector3& targetTank);
@@ -50,6 +52,8 @@ public:
 	int dmg;
 	float shootingVelocity;
 	float weaponTimer;
+
+	Tank * target;
 
 	float mMove;
 	float bodyRotate;
@@ -115,7 +119,7 @@ private:
 
 		enum TankBodyStates
 		{
-			A_STAR, SEEK, WANDER, ESCAPE, STOP, POSSESSED, GET_OUT
+			A_STAR, SEEK, WANDER, ESCAPE, STOP, POSSESSED, GET_OUT, FIRE
 		};
 
 		TankBodyStates currentState;
@@ -179,6 +183,9 @@ public:
 	std::vector<Ogre::Vector3> getPositionTank(int side);
 	
 	SoundPlayer* soundPlayer;
+
+	void controlStates();
+
 private:
 	Ogre::SceneManager* mSceneMgr;
 	std::set<Tank*> tankSideA;
