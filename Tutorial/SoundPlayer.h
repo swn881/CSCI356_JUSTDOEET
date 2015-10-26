@@ -19,8 +19,9 @@ public:
 	SoundPlayer(void);
 	~SoundPlayer(void);
 
-	void playFireSound(const Ogre::Vector3& position);
-	void playExplosionSound(const Ogre::Vector3& position);
+	void playFireSound();
+	void playExplosionSound();
+	void playMovingTank();
 	irrklang::ISound* playMovingTankSound(const Ogre::Vector3& position);
 private:
 	irrklang::ISoundEngine* engine;

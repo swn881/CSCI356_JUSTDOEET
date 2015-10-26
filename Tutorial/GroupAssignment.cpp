@@ -453,6 +453,7 @@ bool GroupAssignment::keyPressed( const OIS::KeyEvent &arg )
 				break;
 			case OIS::KC_SPACE:
 				selectedTank->shoot();
+				soundPlayer->playFireSound();
 				break;
 			default:
 				break;
@@ -510,6 +511,7 @@ bool GroupAssignment::keyReleased( const OIS::KeyEvent &arg )
  
 			case OIS::KC_DOWN:
 				selectedTank->barrelRotation += 1.0;
+				
 				break;
 
 			default:

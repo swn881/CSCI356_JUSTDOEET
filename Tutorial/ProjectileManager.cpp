@@ -178,7 +178,7 @@ void ProjectileManager::createExplosion(const Ogre::Vector3& location){
 	
 	explosions.insert(new Explosion(explosionSn, 1.8f));
 
-	soundPlayer->playExplosionSound(location);
+	soundPlayer->playExplosionSound();
 }
 
 void ProjectileManager::update(const float& delta, TankManager* tankMgr){
