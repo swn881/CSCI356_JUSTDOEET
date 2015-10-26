@@ -97,6 +97,7 @@ private:
 		//wee added here VARIABLES
 		bool pathCreated;
 		Ogre::Real mMoveSpd;
+		Ogre::Real mRotSpd;
 		std::deque<Ogre::Vector3> mWalkList;
 		int startNode;
 		int goalNode;

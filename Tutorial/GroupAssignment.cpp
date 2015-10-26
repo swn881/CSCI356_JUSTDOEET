@@ -306,7 +306,7 @@ bool GroupAssignment::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	updatePowerUps(evt.timeSinceLastFrame);
 
 	powerUpTimer += evt.timeSinceLastFrame;
-	if(powerUpTimer > 10)
+	if(powerUpTimer > 20)
 	{
 		if(spawnLocations.size() > 0)
 		{
@@ -317,8 +317,9 @@ bool GroupAssignment::frameRenderingQueued(const Ogre::FrameEvent& evt)
 			}
 			spawnLocations.clear();
 		}
-		
-
+	}		
+	if(powerUpTimer > 25)
+	{
 		int i = 0;
 		while(i < 5)
 		{
@@ -444,11 +445,11 @@ bool GroupAssignment::keyPressed( const OIS::KeyEvent &arg )
 				break;
 
 			case OIS::KC_UP:
-				selectedTank->barrelRotation += 1.0;
+				selectedTank->barrelRotation = 1.0;
 				break;
  
 			case OIS::KC_DOWN:
-				selectedTank->barrelRotation -= 1.0;
+				selectedTank->barrelRotation = -1.0;
 				break;
 			case OIS::KC_SPACE:
 				selectedTank->shoot();

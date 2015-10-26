@@ -50,8 +50,10 @@ Tank::Tank(Ogre::BillboardSet* healthBar, Ogre::BillboardSet* selectionCircle,
 	mTankBodyNode->attachObject(mHealthBar);
 	mTankBodyNode->attachObject(mSelectionCircle);
 
-	thirdPersonCamNode = mTankBodyNode->createChildSceneNode(Ogre::Vector3(300.f, 150.f, 0.f));
-	thirdPersonCamNode->lookAt(mTankBodyNode->getPosition(), Ogre::Node::TransformSpace::TS_LOCAL);
+	thirdPersonCamNode = mTankTurretNode->createChildSceneNode(Ogre::Vector3(400.f, 150.f, 0.f));
+	Ogre::Vector3 camTarget = mTankTurretNode->getPosition();
+	camTarget.y += 30;
+	thirdPersonCamNode->lookAt(camTarget, Ogre::Node::TransformSpace::TS_LOCAL);
 
 	
 	tankSphere.setRadius(62.5f);
@@ -81,6 +83,8 @@ void Tank::resetAll(void){
 	//wee initialize here
 	pathCreated = false;
 	mMoveSpd = 70.0; 
+	mRotSpd = 50.0; 
+
 	tankStarted = false;
 	mDistance = 0;
 	currentState = A_STAR;
@@ -100,7 +104,7 @@ void Tank::resetAttributes(void){
 	ms = 70.f;
 	fireRate = 2.f;
 	dmg = 15;
-	shootingVelocity = 200.f;
+	shootingVelocity = 400.f;
 }
 
 Ogre::Vector3 Tank::getPosition(void){
@@ -225,7 +229,9 @@ void Tank::decrementPowerups(const float& deltaTime)
 
 		if (powerUpDurationS <= 0.f)
 		{
+			mRotSpd = 50.f;
 			ms = 70.f;
+			mMoveSpd = 70.f;
 			powerUpDurationS = 0.f;
 
 		}
@@ -329,19 +335,21 @@ void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpa
 					case ('R'): //fire rate
 					{
 						fireRate = 1.f;
-						powerUpDurationR = 4.f;
+						powerUpDurationR = 6.f;
 					}
 					break;
 					case ('S'): //speed
 					{
-						ms = 90.f;
-						powerUpDurationS = 4.f;
+						mRotSpd = 75.0f;
+						ms = 100.f;
+						mMoveSpd = 100.f;
+						powerUpDurationS = 6.f;
 					}
 					break;
 					case ('P'): //damage
 					{
 						dmg = 30.f;
-						powerUpDurationP = 4.f;
+						powerUpDurationP = 6.f;
 					}
 					break;
 					default:
@@ -460,23 +468,24 @@ void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpa
 		break;
 
 		case POSSESSED: {
-			mTankBodyNode->translate(mMove, 0, 0, Ogre::Node::TransformSpace::TS_LOCAL);
-			mTankBodyNode->yaw(Ogre::Degree(bodyRotate));
+			mTankBodyNode->translate(mMove * deltaTime * mMoveSpd, 0, 0, Ogre::Node::TransformSpace::TS_LOCAL);
+			mTankBodyNode->yaw(Ogre::Degree(bodyRotate * deltaTime * mRotSpd));
 
 			// Rotate the tank turret
-			mTankTurretNode->yaw(Ogre::Degree(turretRotation));
+			mTankTurretNode->yaw(Ogre::Degree(turretRotation * deltaTime * mRotSpd * 1.5));
 
 			turretDegree += turretRotation;
 
-			//to move barrel change mBarrelRotate
-			barrelDegree += barrelRotation;
+			//to move barrel change barrelRotation
+			float barrelChange = barrelRotation * deltaTime * mRotSpd;
+			barrelDegree += barrelChange;
 
 			if(barrelDegree > 30)
 				barrelDegree = 30;
 			else if(barrelDegree < 0)
 				barrelDegree = 0;
 			else
-				mTankBarrelNode->roll(Ogre::Degree(-barrelRotation));				
+				mTankBarrelNode->roll(Ogre::Degree(-barrelChange));				
 		}
 
 		break;
@@ -927,19 +936,26 @@ void TankManager::checkTankExplosion(const Ogre::SceneNode* tankSnNode, const Og
 	{
 		if ((*it)->isAlive() && (*it)->checkSceneNode(tankSnNode))
 		{
+			printf("Collision detected!\n");
+
 			float distance = (*it)->getPosition().distance(explosionCtr);
 
-			if (distance <= 10.f)
+			if (distance <= 50.f)
 			{
 				(*it)->takeDamage(dmg);
+				printf("Full hit!\n");
 			}
-			else if (distance <= 20.f)
+			else if (distance <= 75.f)
 			{
 				(*it)->takeDamage(dmg - 5);
+				printf("Medium hit!\n");
+
 			}
-			else if (distance <= 30.f)
+			else if (distance <= 100.f)
 			{
 				(*it)->takeDamage(dmg - 10);
+				printf("Small hit!\n");
+
 			}
 
 		}
@@ -949,19 +965,26 @@ void TankManager::checkTankExplosion(const Ogre::SceneNode* tankSnNode, const Og
 	{
 		if ((*it)->isAlive() && (*it)->checkSceneNode(tankSnNode))
 		{
+			printf("Collision detected!\n");
+
 			float distance = (*it)->getPosition().distance(explosionCtr);
 
-			if (distance <= 10.f)
+			if (distance <= 50.f)
 			{
-				(*it)->takeDamage(15);
+				(*it)->takeDamage(dmg);
+				printf("Full hit!\n");
 			}
-			else if (distance <= 20.f)
+			else if (distance <= 75.f)
 			{
-				(*it)->takeDamage(10);
+				(*it)->takeDamage(dmg - 5);
+				printf("Medium hit!\n");
+
 			}
-			else if (distance <= 30.f)
+			else if (distance <= 100.f)
 			{
-				(*it)->takeDamage(5);
+				(*it)->takeDamage(dmg - 10);
+				printf("Small hit!\n");
+
 			}
 
 		}

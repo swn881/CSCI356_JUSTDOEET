@@ -59,7 +59,7 @@ void ProjectileManager::init(Ogre::SceneManager* scnMgr, SoundPlayer* soundPlaye
 
 	gravityValue = 80.f;
 	explosionSphere.setCenter(Ogre::Vector3::ZERO);
-	explosionSphere.setRadius(15.f);
+	explosionSphere.setRadius(30.f);
 
 	counter = 0;
 }
@@ -78,7 +78,7 @@ void ProjectileManager::createProjectile(const Ogre::Vector3& tankPosition, cons
 
 	Ogre::SceneNode* particleSn = parentParticleSn->createChildSceneNode();
 
-	Ogre::Vector3 start(-100.f, 10.f, 0.f);
+	Ogre::Vector3 start(-115.f, 10.f, 0.f);
 
 	parentParticleSn->setPosition(tankPosition);
 	particleSn->setPosition(start);
