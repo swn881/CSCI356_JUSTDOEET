@@ -26,6 +26,12 @@ bool PowerUpSpawn::getIsPowerUp()
 	return isPowerUp;
 }
 
+Ogre::Vector3 PowerUpSpawn::getPowerLocation()
+{
+	return spawnNode->getPosition();
+}
+
+
 void PowerUpSpawn::createPowerUp(Ogre::SceneManager* ScnMgr, char settype) //call initially and whenever we want to create a powerup
 {
 	isPowerUp = true;

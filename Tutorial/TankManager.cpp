@@ -217,6 +217,10 @@ void Tank::setPossessed(bool possessed){
 					aStar(2);
 				}
 			}
+			else
+			{
+				currentState = WANDER;
+			}
 		}
 		else if (tankSide == 2)
 		{
@@ -228,13 +232,18 @@ void Tank::setPossessed(bool possessed){
 					aStar(tankSide);
 				}
 			}
-			else if(tempCoor.x > 625 && tempCoor.x < 2125)
+			else if(tempCoor.x > -2125 && tempCoor.x < -625)
 			{
 				if(tempCoor.z > -2125 && tempCoor.z < 2125)
 				{
+					//means we are near the spawn point of side A
 					currentState = A_STAR;
 					aStar(1);
 				}
+			}
+			else
+			{
+				currentState = WANDER;
 			}
 		}
 	}
@@ -442,7 +451,31 @@ void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpa
 
 	//weapontimer
 	weaponTimer += deltaTime;
-		
+
+	//seek powerups
+	Ogre::Real distancePowerUp;
+	int powerUpNo = 0;
+	bool firstTimeDistanceCheck = true;
+	for(int i = 0; i < mPowerUpSpawns.size(); i++)
+	{
+		if(mPowerUpSpawns[i]->getIsPowerUp())
+		{
+			Ogre::Real tempDistancePowerUp = mTankBodyNode->getPosition().distance(mPowerUpSpawns[i]->getPowerLocation());
+
+			if(firstTimeDistanceCheck)
+			{
+				firstTimeDistanceCheck = false;
+				distancePowerUp = tempDistancePowerUp;
+			}
+			if(tempDistancePowerUp < distancePowerUp)
+			{
+				distancePowerUp = tempDistancePowerUp;
+				powerUpNo = i;
+			}
+		}
+	}
+	if(distancePowerUp < 100 && distancePowerUp > 0)
+		currentState = SEEK;
 
 	//no movement for body yet
 
@@ -480,7 +513,7 @@ void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpa
 			break;
 	
 		case SEEK:
-			
+			seek(mPowerUpSpawns[powerUpNo]->getPowerLocation(), deltaTime);
 		break;
 		case ESCAPE:
 			
@@ -756,6 +789,54 @@ void Tank::wander(const float& deltaTime){
 	mTankBodyNode->lookAt(displacement, Ogre::Node::TransformSpace::TS_WORLD);
 
 	mTankBodyNode->translate(steering * deltaTime);
+
+	/*
+	Ogre::Vector3 rayDest;
+
+	rayDest = mTankBodyNode->getOrientation() * Ogre::Vector3(1,0,0);
+
+	bool check = false;
+	
+
+			Ogre::Ray shootToCheckWall = Ogre::Ray(mTankBodyNode->getPosition(), rayDest);
+
+			Ogre::RaySceneQuery* mRaySceneQuery = mSceneMgr->createRayQuery(shootToCheckWall, Ogre::SceneManager::ENTITY_TYPE_MASK);
+			mRaySceneQuery->setSortByDistance(true);
+
+			// Ray-cast and get first hit
+			Ogre::RaySceneQueryResult &result = mRaySceneQuery->execute();
+			Ogre::RaySceneQueryResult::iterator itr = result.begin();
+
+			bool hit = false;
+			for (itr = result.begin(); itr != result.end(); itr++) 
+			{
+					
+				std::string x = itr->movable->getName();
+				printf("Check %s \n", x.c_str());
+
+				if (x[0] == 'C' && itr->distance < 10)
+				{
+					printf("Too close to %s: %f \n", x.c_str(), (float)itr->distance);
+					hit = true;
+				}
+			}
+
+			if(hit == true)
+			{
+				mTankBodyNode->yaw(Ogre::Degree(180));
+				mTankBodyNode->translate((mTankBodyNode->getPosition() * Ogre::Vector3(-1,0,0)) * deltaTime );
+			}
+			else if (hit == false)
+			{
+				
+				check = true;
+			}
+	
+	
+	*/
+
+			
+
 
 }
 
