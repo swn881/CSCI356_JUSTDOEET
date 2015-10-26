@@ -467,15 +467,14 @@ void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpa
 		case FIRE:
 		{
 			Ogre::Degree angle = getShootingAngle(target->getPosition());
-			//Ogre::Quaternion direction = mTankTurretNode->getPosition()->getRotationTo(target->getPosition());
-			mTankTurretNode->lookAt(target->getPosition(), Ogre::Node::TransformSpace::TS_WORLD, Ogre::Vector3::NEGATIVE_UNIT_Z);
+			mTankTurretNode->lookAt(target->getPosition(), Ogre::Node::TransformSpace::TS_WORLD, Ogre::Vector3::NEGATIVE_UNIT_X);
 			//barrelDegree = angle;
 			if (weaponTimer > 4)
 			{
 				tnkMgr->createProjectile(mTankBodyNode->getPosition(), mTankTurretNode->_getDerivedOrientation(), angle, shootingVelocity, dmg);
 				weaponTimer = 0;
 			}
-			if (target->hp <= 0)
+			if (target->hp <= 0 || mTankBodyNode->getPosition().distance(target->getPosition()) > 600 )
 				currentState = WANDER;
 		}
 		break;
