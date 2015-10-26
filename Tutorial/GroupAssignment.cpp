@@ -354,8 +354,18 @@ bool GroupAssignment::keyPressed( const OIS::KeyEvent &arg )
 			printf("Health: %f\n", selectedTank->hp); 
 		}
 		break;
-
+		case OIS::KC_K:
 		
+		if (!inTankMode && selectedTank != NULL)
+		{
+			selectedTank->attachCamera(mCamera);
+			inTankMode = true;
+			mTrayMgr->hideCursor();
+			selectedTank->setPossessed(true);
+
+			soundPlayer->playMovingTank();
+		}
+		break;
 		case OIS::KC_V:
 			controlWeather();
 		break;		
@@ -615,12 +625,6 @@ bool GroupAssignment::mousePressed( const OIS::MouseEvent &arg, OIS::MouseButton
 								updateHealthOverlay(selectedTank->hp);
 								updateTextOverlay();
 
-								selectedTank->attachCamera(mCamera);
-								inTankMode = true;
-								mTrayMgr->hideCursor();
-								selectedTank->setPossessed(true);
-
-								soundPlayer->playMovingTank();
 							}
 						}
 					}

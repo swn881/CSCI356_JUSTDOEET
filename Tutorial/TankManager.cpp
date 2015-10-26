@@ -76,6 +76,7 @@ Tank::Tank(Ogre::BillboardSet* healthBar, Ogre::BillboardSet* selectionCircle,
 	exitNodesB.push_back(598);
 	exitNodesB.push_back(922);
 	exitNodesB.push_back(1246);
+
 }
 
 void Tank::resetAll(void){
@@ -527,39 +528,49 @@ void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpa
 		break;
 
 		case POSSESSED: {
+			Ogre::Vector3 rayDest;
+
+			if (mMove < 0)
+				rayDest = mTankBodyNode->getOrientation() * Ogre::Vector3(-1,0,0);
+			else if (mMove > 0)
+				rayDest = mTankBodyNode->getOrientation() * Ogre::Vector3(1,0,0);
+
 
 			//THIS IS WHERE THE TANK IS MOVED WHEN PROCESSING
 
-			//WE MOVED
-			Ogre::Vector3 RayDirection = mTankBodyNode->getPosition();
-			Ogre::SceneNode * RayDir = mTankBodyNode->createChildSceneNode(RayDirection);
-
-			RayDir->translate(1, 0, 0, Ogre::Node::TransformSpace::TS_LOCAL);
-			RayDirection = RayDir->getPosition();
-
-			Ogre::Ray shootToCheckWall = Ogre::Ray(mTankBodyNode->getPosition(), RayDirection);
-
-			Ogre::RaySceneQuery* mRaySceneQuery = mSceneMgr->createRayQuery(shootToCheckWall, Ogre::SceneManager::ENTITY_TYPE_MASK);
-			mRaySceneQuery->setSortByDistance(true);
-			// Ray-cast and get first hit
-			Ogre::RaySceneQueryResult &result = mRaySceneQuery->execute();
-			Ogre::RaySceneQueryResult::iterator itr = result.begin();
-			Ogre::String name = itr->movable->getName();
-			while((name == tankBody->getName() || name == tankTurret->getName() || name == tankBarrel->getName()) && itr != result.end() )
+			//if (rayDest != NULL)
 			{
-				itr++;
-				name = itr->movable->getName();
-			}
-			if(itr != result.end() && ((*itr).distance > 0.01 || mMove > 0))
-			{
-				
-				mTankBodyNode->translate(mMove * deltaTime * mMoveSpd, 0, 0, Ogre::Node::TransformSpace::TS_LOCAL);
-			}
+				Ogre::Ray shootToCheckWall = Ogre::Ray(mTankBodyNode->getPosition(), rayDest);
+
+				Ogre::RaySceneQuery* mRaySceneQuery = mSceneMgr->createRayQuery(shootToCheckWall, Ogre::SceneManager::ENTITY_TYPE_MASK);
+				mRaySceneQuery->setSortByDistance(true);
+
+				// Ray-cast and get first hit
+				Ogre::RaySceneQueryResult &result = mRaySceneQuery->execute();
+				Ogre::RaySceneQueryResult::iterator itr = result.begin();
+
+				bool hit = false;
+				for (itr = result.begin(); itr != result.end(); itr++) 
+				{
 					
+					std::string x = itr->movable->getName();
+					printf("Check %s \n", x.c_str());
+
+					if (x[0] == 'C' && itr->distance < 10)
+					{
+						printf("Too close to %s: %f \n", x.c_str(), (float)itr->distance);
+						hit = true;
+					}
+				}
+
+				if(hit == false)
+				{
+				
+					mTankBodyNode->translate(mMove * deltaTime * mMoveSpd, 0, 0, Ogre::Node::TransformSpace::TS_LOCAL);
+				}
+			}		
 
 			mTankBodyNode->yaw(Ogre::Degree(bodyRotate * deltaTime * mRotSpd));
-			//mTankBodyNode->translate(mMove * deltaTime * mMoveSpd, 0, 0, Ogre::Node::TransformSpace::TS_LOCAL);
-			//mTankBodyNode->yaw(Ogre::Degree(bodyRotate * deltaTime * mRotSpd));
 
 			// Rotate the tank turret
 			mTankTurretNode->yaw(Ogre::Degree(turretRotation * deltaTime * mRotSpd * 1.5));
