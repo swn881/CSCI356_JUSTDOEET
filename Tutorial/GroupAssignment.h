@@ -61,7 +61,6 @@ private:
 	std::vector<PowerUpSpawn*> mPowerUpSpawns;
 	Ogre::Overlay* mBulletAnimation;
 	int mPowerupCount;
-	float mWeaponTimer;
 	virtual void createWeather(void); //place in setup
 	virtual void controlWeather();			  //place in a case statement for keypress, will toggle weather
 	void createReloadOverlay(Ogre::OverlayManager &overlayManager); //place in or around createscene, wherever overlay is created

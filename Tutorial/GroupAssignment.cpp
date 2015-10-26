@@ -36,7 +36,6 @@ bool GroupAssignment::setup(void)
 
 	//////////Danni Code
 	createWeather();
-	mWeaponTimer = 10;
 	////////////
 	mTrayMgr->showCursor();
 
@@ -288,9 +287,6 @@ bool GroupAssignment::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	tankManager->update(evt.timeSinceLastFrame, mPowerUpSpawns);
 	projectileManager->update(evt.timeSinceLastFrame,tankManager);
 
-	mWeaponTimer += evt.timeSinceLastFrame;
-
-
 	///////////////////////////////////////////////////////////////////////////////////////////////
 
 	//also needs a check for if we change which tank is selected
@@ -299,7 +295,7 @@ bool GroupAssignment::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	if (mTextGUI->isVisible() && selectedTank != NULL)
 	{
 		updateTextOverlay();
-		updateReloadOverlay(mWeaponTimer);
+		updateReloadOverlay(selectedTank->weaponTimer);
 		if (mPrevHealth != selectedTank->hp)
 		{
 			mPrevHealth = selectedTank->hp;
@@ -366,6 +362,9 @@ bool GroupAssignment::keyPressed( const OIS::KeyEvent &arg )
 			soundPlayer->playMovingTank();
 		}
 		break;
+		case OIS::KC_P:
+			mWindow->writeContentsToTimestampedFile("GroupProject", ".png");
+			break;
 		case OIS::KC_V:
 			controlWeather();
 		break;		
@@ -386,9 +385,7 @@ bool GroupAssignment::keyPressed( const OIS::KeyEvent &arg )
 			}
 		}
 		break;	
-		case OIS::KC_P:
-			mWeaponTimer = 0;
-		break;
+
 		/////////////////////////////
 		case OIS::KC_LSHIFT:
 			mTrayMgr->hideCursor();
@@ -467,8 +464,12 @@ bool GroupAssignment::keyPressed( const OIS::KeyEvent &arg )
 				selectedTank->barrelRotation = -1.0;
 				break;
 			case OIS::KC_SPACE:
-				selectedTank->shoot();
-				soundPlayer->playFireSound();
+				if (selectedTank->weaponTimer > 4)
+				{
+					selectedTank->shoot();
+					selectedTank->weaponTimer = 0.f;
+					soundPlayer->playFireSound();
+				}
 				break;
 			default:
 				break;
@@ -833,7 +834,7 @@ void GroupAssignment::createReloadOverlay(Ogre::OverlayManager &overlayManager)
 
 void GroupAssignment::updateReloadOverlay(double time)
 {
-	if (time < 1) //if we change tank selected we should also hide all these as well to make a clean slate
+	if (time < 0.8) //if we change tank selected we should also hide all these as well to make a clean slate
 	{
 		mBulletAnimation->getChild("Bullet1")->hide();
 		mBulletAnimation->getChild("Bullet2")->hide();
@@ -841,19 +842,19 @@ void GroupAssignment::updateReloadOverlay(double time)
 		mBulletAnimation->getChild("Bullet4")->hide();
 		mBulletAnimation->getChild("Bullet5")->hide();
 	}
-	else if (time > 1)
+	else if (time > 0.8)
 	{
 		mBulletAnimation->getChild("Bullet1")->show();
-		if (time > 2)
+		if (time > 1.6)
 		{
 			mBulletAnimation->getChild("Bullet2")->show();
-			if (time > 3)
+			if (time > 2.4)
 			{
 				mBulletAnimation->getChild("Bullet3")->show();
-				if (time > 4)
+				if (time > 3.2)
 				{
 					mBulletAnimation->getChild("Bullet4")->show();
-					if (time > 5)
+					if (time > 4)
 					{
 						mBulletAnimation->getChild("Bullet5")->show();
 					}

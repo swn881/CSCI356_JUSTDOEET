@@ -49,7 +49,8 @@ public:
 	float fireRate;
 	int dmg;
 	float shootingVelocity;
-		
+	float weaponTimer;
+
 	float mMove;
 	float bodyRotate;
 	float turretRotation;

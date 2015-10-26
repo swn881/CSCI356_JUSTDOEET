@@ -84,6 +84,7 @@ void Tank::resetAll(void){
 	powerUpDurationP = 0.f;
 	powerUpDurationS = 0.f;
 	powerUpDurationR = 0.f;
+	weaponTimer = 0.f;
 
 	deathTimer = 5.f;
 	mDestination = Ogre::Vector3::ZERO;
@@ -425,79 +426,13 @@ void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpa
 		}
 	}
 
-/*
-		tankSphere.setCenter(tankCenter);
-		ssq->setSphere(tankSphere);
-		Ogre::SceneQueryResult& result = ssq->execute();
+	decrementPowerups(deltaTime);
 
+	//weapontimer
+	weaponTimer += deltaTime;
 		
 
-		if (result.movables.size() > 0 )
-		{
-			Ogre::SceneQueryResultMovableList::iterator sqrItr;
-			for (sqrItr = result.movables.begin(); sqrItr != result.movables.end(); sqrItr++){
-				//if tank, minus health based on the distance from the explosion center
-				
-				bool check = false;
-				int found;
-				Ogre::SceneNode * x = (*sqrItr)->getParentSceneNode();
-				for(int i = 0; i < mPowerUpSpawns.size() && check == false; i++)
-				{
-					Ogre::SceneNode * y = mPowerUpSpawns[i]->spawnNode;
-					if(x == y )
-					{
-						found = i;
-						check = true;
-					}
-				}
-				if(check)
-				{
-					if(mPowerUpSpawns[found]->getIsPowerUp())
-					{
-						char tempType = mPowerUpSpawns[found]->pickupPowerUp(mSceneMgr);
-
-						switch(tempType)
-						{
-							case 'H': //health
-							{
-								hp += 0.1f;
-								if (hp > 1.0f)
-								{
-									hp = 1.0f;
-								}
-							}
-							break;
-							case 'R': //fire rate
-							{
-								fireRate = 1.f;
-								powerUpDuration = 4.f;
-							}
-							break;
-							case 'S': //speed
-							{
-								ms = 90.f;
-								powerUpDuration = 4.f;
-							}
-							break;
-							case 'P': //damage
-							{
-								dmg = 30.f;
-								powerUpDuration = 4.f;
-							}
-							break;
-						}
-					}
-						
-				}
-					
-			}
-		} 
-		sphereSceneTime = 0;
-	}
-	*/
-	decrementPowerups(deltaTime);
 	//no movement for body yet
-	
 
 	//A_STAR, SEEK, WANDER, ESCAPE, STOP
 	switch(currentState)
