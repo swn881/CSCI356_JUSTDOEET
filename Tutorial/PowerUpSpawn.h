@@ -27,6 +27,7 @@ public:
 
 	void createPowerUp(Ogre::SceneManager* ScnMgr, char settype);	//call initially and whenever we want to create a powerup, make private //changed to public
 	bool getIsPowerUp();
+	Ogre::Vector3 getPowerLocation();
 };
 
 

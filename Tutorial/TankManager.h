@@ -137,11 +137,46 @@ private:
 		void aStarMovement(const float&);
 		void findShortestExit(int); //give me the shortest exits based on the side you are currenty in
 
+		void seekAStar();
+		void createSeekPath(float height, std::vector<int>& path);
+		bool seekNextLocation();
+		void seekMovement(const float&);
+		int seekStartNode;
+		int seekGoalNode;
+		bool seekPathCreated;
+		Ogre::Vector3 seekTarget;
+		std::deque<Ogre::Vector3> mSeekList;
+		Ogre::Vector3 mSeekDestination;
+		Ogre::Vector3 mSeekDirection;
+		float mSeekDistance;
+
+		void wanderAStar();
+		void createWanderPath(float height, std::vector<int>& path);
+		bool wanderNextLocation();
+		void wanderMovement(const float&);
+		void createRandomWander();
+		void resetWander();
+		int wanderStartNode;
+		int wanderGoalNode;
+		bool wanderPathCreated;
+		std::deque<Ogre::Vector3> mWanderList;
+		Ogre::Vector3 mWanderDestination;
+		Ogre::Vector3 mWanderDirection;
+		float mWanderDistance;
+
+		float checkPosition; //used to check if we are at same spot eveery like 3 seconds
+		Ogre::Vector3 previousLocation;
+		void checkWhereAt();
+
+		Ogre::Quaternion initBodyOrientation;
+		Ogre::Quaternion initBarrelOrientation;
+		Ogre::Quaternion initTurretOrientation;
+		bool orientationEquals( Ogre::Quaternion a, Ogre::Quaternion b);
+		float checkOrientation;
+
 		//wee added end
 	bool selected;
 	void rotateTank(void);
-
-	
 };
 
 /*
