@@ -361,7 +361,7 @@ bool GroupAssignment::keyPressed( const OIS::KeyEvent &arg )
 
 				soundPlayer->playMovingTank();
 			}
-			if(inTankMode)
+			else if(inTankMode)
 			{
 				selectedTank->detachCamera(mCamera);
 				mCamera->setPosition(Ogre::Vector3(0, 900, 1000));

@@ -36,6 +36,7 @@ public:
 
 	Ogre::String getState();
 
+	Ogre::Vector3 getPredictPos(Tank * targetTank); 
 	Ogre::Degree getShootingAngle(const Ogre::Vector3& targetTank);
 
 	void update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpawns);

@@ -280,6 +280,14 @@ bool Tank::isAlive(void){
 	return hp > 0.f;
 }
 
+Ogre::Vector3 Tank::getPredictPos(Tank * targetTank)
+{
+	Ogre::Vector3 shotPoint = targetTank->getPosition();
+
+	return shotPoint;
+}
+
+
 Ogre::Degree Tank::getShootingAngle(const Ogre::Vector3& targetTank){
 	float distance = getPosition().distance(targetTank);
 
@@ -463,8 +471,11 @@ void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpa
 		break;
 		case FIRE:
 		{
-			Ogre::Degree angle = getShootingAngle(target->getPosition());
-			mTankTurretNode->lookAt(target->getPosition(), Ogre::Node::TransformSpace::TS_WORLD, Ogre::Vector3::NEGATIVE_UNIT_X);
+			Ogre::Vector3 targetPosition = getPredictPos(target);
+
+			Ogre::Degree angle = getShootingAngle(targetPosition);
+
+			mTankTurretNode->lookAt(targetPosition, Ogre::Node::TransformSpace::TS_WORLD, Ogre::Vector3::NEGATIVE_UNIT_X);
 			//barrelDegree = angle;
 			if (weaponTimer > 4)
 			{
@@ -474,7 +485,7 @@ void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpa
 			if (target->hp <= 0 || mTankBodyNode->getPosition().distance(target->getPosition()) > 600 )
 				currentState = WANDER;
 		}
-		
+		break;
 		case WANDER:
 			wander(deltaTime);
 			break;
