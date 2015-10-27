@@ -525,6 +525,7 @@ void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpa
 	weaponTimer += deltaTime;
 
 	//seek powerups
+	/*
 	Ogre::Real distancePowerUp = 0;
 	int powerUpNo = 0;
 	bool firstTimeDistanceCheck = true;
@@ -545,7 +546,7 @@ void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpa
 				powerUpNo = i;
 			}
 		}
-	}
+	}*/
 	/*
 	if(distancePowerUp < 500 && distancePowerUp > 0 && currentState != POSSESSED)
 	{
@@ -565,41 +566,43 @@ void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpa
 	}*/
 	
 	//check if the user is like somewhere and stopped ocassionally 
-	checkPosition += deltaTime;
-	if(checkPosition > 3)
+	if (currentState != POSSESSED)
 	{
-		if(mTankBodyNode->getPosition().x == previousLocation.x)
+		checkPosition += deltaTime;
+		if(checkPosition > 3)
 		{
-			if(mTankBodyNode->getPosition().z == previousLocation.z)
+			if(mTankBodyNode->getPosition().x == previousLocation.x)
 			{
-				checkWhereAt();
+				if(mTankBodyNode->getPosition().z == previousLocation.z)
+				{
+					checkWhereAt();
+				}
 			}
+			checkPosition = 0;
+			previousLocation = mTankBodyNode->getPosition();
 		}
-		checkPosition = 0;
-		previousLocation = mTankBodyNode->getPosition();
-	}
 	
-	checkOrientation += deltaTime;
-	if(checkOrientation > 15)
-	{
-		if(currentState != A_STAR)
+		checkOrientation += deltaTime;
+		if(checkOrientation > 15)
 		{
-			if(!orientationEquals(initBodyOrientation, mTankBodyNode->getOrientation()))
+			if(currentState != A_STAR)
 			{
-				mTankBodyNode->setOrientation(initBodyOrientation);
+				if(!orientationEquals(initBodyOrientation, mTankBodyNode->getOrientation()))
+				{
+					mTankBodyNode->setOrientation(initBodyOrientation);
+				}
+				if(!orientationEquals(initBarrelOrientation, mTankBarrelNode->getOrientation()))
+				{
+					mTankBarrelNode->setOrientation(initBarrelOrientation);
+				}
+				if(!orientationEquals(initTurretOrientation, mTankTurretNode->getOrientation()))
+				{
+					mTankTurretNode->setOrientation(initTurretOrientation);
+				}
 			}
-			if(!orientationEquals(initBarrelOrientation, mTankBarrelNode->getOrientation()))
-			{
-				mTankBarrelNode->setOrientation(initBarrelOrientation);
-			}
-			if(!orientationEquals(initTurretOrientation, mTankTurretNode->getOrientation()))
-			{
-				mTankTurretNode->setOrientation(initTurretOrientation);
-			}
+			checkOrientation = 0;
 		}
-		checkOrientation = 0;
 	}
-	
 
 	//no movement for body yet
 

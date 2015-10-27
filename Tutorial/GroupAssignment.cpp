@@ -3,8 +3,7 @@
 //-------------------------------------------------------------------------------------
 GroupAssignment::GroupAssignment(void)
 	: mOverlaySystem(0),
-	mPowerupCount(0),
-	testhealth(100)
+	mPowerupCount(0)
 {
 }
 //-------------------------------------------------------------------------------------
@@ -1064,22 +1063,27 @@ void GroupAssignment::updateHealthOverlay(float health)
 	int visHealth; //how many health blocks to show
 	
 	visHealth = 1 + (x-1)/10;
-	if (visHealth >= 0 && visHealth + 1 <= 20)
+
+	if (mPrevHealth != visHealth)
 	{
-		for (int i = 1; i < visHealth + 1; i++)
+		mPrevHealth = visHealth;
+		if (visHealth >= 0 && visHealth + 1 <= 20)
 		{
-			std::ostringstream oss;
-			oss << i; 
-			mHealthBar->getChild("Health" + oss.str())->show();
-		}
+			for (int i = 1; i < visHealth + 1; i++)
+			{
+				std::ostringstream oss;
+				oss << i; 
+				mHealthBar->getChild("Health" + oss.str())->show();
+			}
 
-		for (int i = visHealth + 1; i < 21; i++)
-		{
-			std::ostringstream oss;
-			oss << i; 
-			printf("Health %s", oss.str().c_str());
+			for (int i = visHealth + 1; i < 21; i++)
+			{
+				std::ostringstream oss;
+				oss << i; 
+				printf("Health %s", oss.str().c_str());
 
-			mHealthBar->getChild("Health" + oss.str())->hide();
+				mHealthBar->getChild("Health" + oss.str())->hide();
+			}
 		}
 	}
 }

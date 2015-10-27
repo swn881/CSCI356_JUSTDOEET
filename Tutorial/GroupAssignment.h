@@ -79,8 +79,7 @@ private:
 	void createTextOverlay(Ogre::OverlayManager &overlayManager, Ogre::Real x, Ogre::Real y, Ogre::Real width, Ogre::Real height);
 	void updateTextOverlay();
 
-	int testhealth;
-	float mPrevHealth;
+	int mPrevHealth;
 	Ogre::Overlay* mHealthBar;
 	void createHealthOverlay(Ogre::OverlayManager &overlayManager, Ogre::Real x, Ogre::Real y, Ogre::Real width, Ogre::Real height);
 	void updateHealthOverlay(float health);
