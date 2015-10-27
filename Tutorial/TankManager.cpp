@@ -546,7 +546,8 @@ void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpa
 			}
 		}
 	}
-	if(distancePowerUp < 500 && distancePowerUp > 0)
+	/*
+	if(distancePowerUp < 500 && distancePowerUp > 0 && currentState != POSSESSED)
 	{
 		if(mPowerUpSpawns[powerUpNo]->getIsPowerUp())
 		{
@@ -561,7 +562,7 @@ void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpa
 		else 
 			currentState = WANDER;
 		
-	}
+	}*/
 	
 	//check if the user is like somewhere and stopped ocassionally 
 	checkPosition += deltaTime;
@@ -620,6 +621,7 @@ void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpa
 		case FIRE:
 		{
 			Ogre::Vector3 targetPosition = getPredictPos(target);
+			targetPosition.y = 16.f;
 
 			Ogre::Degree angle = getShootingAngle(targetPosition);
 
@@ -633,7 +635,6 @@ void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpa
 			if (target->hp <= 0 || mTankBodyNode->getPosition().distance(target->getPosition()) > 600 )
 				currentState = WANDER;
 		}
-		break;
 		case WANDER:
 			//wander(deltaTime);
 			wanderMovement(deltaTime);
@@ -643,7 +644,7 @@ void Tank::update(const float& deltaTime, std::vector<PowerUpSpawn*> mPowerUpSpa
 			//seek(mPowerUpSpawns[powerUpNo]->getPowerLocation(), deltaTime);
 
 			//seek(Ogre::Vector3::ZERO, deltaTime);
-			seekMovement(deltaTime);
+			//seekMovement(deltaTime);
 		break;
 		case ESCAPE:
 			

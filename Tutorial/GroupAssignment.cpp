@@ -291,16 +291,12 @@ bool GroupAssignment::frameRenderingQueued(const Ogre::FrameEvent& evt)
 
 	//also needs a check for if we change which tank is selected
 	
-	
 	if (mTextGUI->isVisible() && selectedTank != NULL)
 	{
 		updateTextOverlay();
 		updateReloadOverlay(selectedTank->weaponTimer);
-		if (mPrevHealth != selectedTank->hp)
-		{
-			mPrevHealth = selectedTank->hp;
-			updateHealthOverlay(selectedTank->hp); //pass the health
-		}
+		updateHealthOverlay(selectedTank->hp); //pass the health
+	
 	}	
 	updatePowerUps(evt.timeSinceLastFrame);
 
@@ -1062,23 +1058,29 @@ void GroupAssignment::updateTextOverlay()
 
 void GroupAssignment::updateHealthOverlay(float health)
 {
+
+
 	int x = health * 200;
 	int visHealth; //how many health blocks to show
-
+	
 	visHealth = 1 + (x-1)/10;
-
-	for (int i = 1; i < visHealth + 1; i++)
+	if (visHealth >= 0 && visHealth + 1 <= 20)
 	{
-		std::ostringstream oss;
-		oss << i; 
-		mHealthBar->getChild("Health" + oss.str())->show();
-	}
+		for (int i = 1; i < visHealth + 1; i++)
+		{
+			std::ostringstream oss;
+			oss << i; 
+			mHealthBar->getChild("Health" + oss.str())->show();
+		}
 
-	for (int i = visHealth + 1; i < 21; i++)
-	{
-		std::ostringstream oss;
-		oss << i; 
-		mHealthBar->getChild("Health" + oss.str())->hide();
+		for (int i = visHealth + 1; i < 21; i++)
+		{
+			std::ostringstream oss;
+			oss << i; 
+			printf("Health %s", oss.str().c_str());
+
+			mHealthBar->getChild("Health" + oss.str())->hide();
+		}
 	}
 }
 
